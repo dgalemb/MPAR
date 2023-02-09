@@ -3,7 +3,14 @@ from gramLexer import gramLexer
 from gramListener import gramListener
 from gramParser import gramParser
 import sys
-        
+
+class Etat():
+
+    def __init__(self, nom, id, transitions = {}) -> None:
+        self.id = id
+        self.nom = nom
+        self.transitions = transitions
+
 class gramPrintListener(gramListener):
 
     def __init__(self, dictt = {'transact_type1': [], 'transact_type2': [], 'actions' : [], 'etats': []}):
@@ -13,6 +20,9 @@ class gramPrintListener(gramListener):
     def enterDefstates(self, ctx):
         print("States: %s" % str([str(x) for x in ctx.ID()]))
         self.props['etats'] = ([str(x) for x in ctx.ID()])
+
+        for etat, id in zip([str(x) for x in ctx.ID()], range(len([str(x) for x in ctx.ID()]))):
+            chaine.append(Etat(nom = etat, id = id))
 
     def enterDefactions(self, ctx):
         print("Actions: %s" % str([str(x) for x in ctx.ID()]))
@@ -37,6 +47,11 @@ class gramPrintListener(gramListener):
 
             
 def main():
+
+    global chaine
+
+    chaine = []
+
     lexer = gramLexer(FileStream("MDP-parser/ex.mdp"))
     stream = CommonTokenStream(lexer)
     parser = gramParser(stream)
@@ -46,6 +61,13 @@ def main():
     p = walker.walk(printer, tree)
 
     print(printer.props)
+    print([k.nom for k in chaine])
+
+def change_state(etat):
+
+    pass
+
+    #return id_etat
 
 if __name__ == '__main__':
     main()
