@@ -48,11 +48,11 @@ class gramParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ "<INVALID>", "'States'", "'Actions'", "'transition'", 
+    literalNames = [ "<INVALID>", "'States'", "'Actions'", "'transition'",
                      "':'", "'->'", "';'", "','", "'+'", "'['", "']'" ]
 
-    symbolicNames = [ "<INVALID>", "STATES", "ACTIONS", "TRANSITION", "DPOINT", 
-                      "FLECHE", "SEMI", "VIRG", "PLUS", "LCROCH", "RCROCH", 
+    symbolicNames = [ "<INVALID>", "STATES", "ACTIONS", "TRANSITION", "DPOINT",
+                      "FLECHE", "SEMI", "VIRG", "PLUS", "LCROCH", "RCROCH",
                       "INT", "ID", "WS" ]
 
     RULE_program = 0
@@ -63,7 +63,7 @@ class gramParser ( Parser ):
     RULE_transact = 5
     RULE_transnoact = 6
 
-    ruleNames =  [ "program", "defstates", "defactions", "transitions", 
+    ruleNames =  [ "program", "defstates", "defactions", "transitions",
                    "trans", "transact", "transnoact" ]
 
     EOF = Token.EOF
@@ -610,8 +610,3 @@ class gramParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
-
-
-
-

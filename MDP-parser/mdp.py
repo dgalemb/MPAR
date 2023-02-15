@@ -2,6 +2,7 @@ from antlr4 import *
 from gramLexer import gramLexer
 from gramListener import gramListener
 from gramParser import gramParser
+from gramPrint import print_graph, print_graph2
 import sys
 
 class Etat():
@@ -16,7 +17,7 @@ class gramPrintListener(gramListener):
     def __init__(self, dictt = {'transact_type1': [], 'transact_type2': [], 'actions' : [], 'etats': []}):
         self.props = dictt
         pass
-        
+
     def enterDefstates(self, ctx):
         print("States: %s" % str([str(x) for x in ctx.ID()]))
         self.props['etats'] = ([str(x) for x in ctx.ID()])
@@ -36,7 +37,7 @@ class gramPrintListener(gramListener):
         print("Transition from " + dep + " with action "+ act + " and targets " + str(ids) + " with weights " + str(weights))
         self.props['transact_type1'].append([dep, act, ids, weights])
 
-        
+
     def enterTransnoact(self, ctx):
         ids = [str(x) for x in ctx.ID()]
         dep = ids.pop(0)
@@ -45,14 +46,14 @@ class gramPrintListener(gramListener):
         self.props['transact_type2'].append([dep, ids, weights])
 
 
-            
+
 def main():
 
     global chaine
 
     chaine = []
 
-    lexer = gramLexer(FileStream("MDP-parser/ex.mdp"))
+    lexer = gramLexer(FileStream("ex.mdp"))
     stream = CommonTokenStream(lexer)
     parser = gramParser(stream)
     tree = parser.program()
@@ -62,6 +63,10 @@ def main():
 
     print(printer.props)
     print([k.nom for k in chaine])
+
+    # print_graph()
+    print_graph2()
+
 
 def change_state(etat):
 
