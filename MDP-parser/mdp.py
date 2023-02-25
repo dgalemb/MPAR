@@ -2,6 +2,7 @@ from antlr4 import *
 from gramLexer import gramLexer
 from gramListener import gramListener
 from gramParser import gramParser
+from gramPrint import print_graph, print_graph2
 import sys
 
 import numpy as np
@@ -21,7 +22,7 @@ class gramPrintListener(gramListener):
     def __init__(self, dictt = {'transact_type1': [], 'transact_type2': [], 'actions' : [], 'etats': []}):
         #self.props = dictt
         pass
-        
+
     def enterDefstates(self, ctx):
         #print("States: %s" % str([str(x) for x in ctx.ID()]))
         #self.props['etats'] = ([str(x) for x in ctx.ID()])
@@ -64,7 +65,7 @@ class gramPrintListener(gramListener):
             array[id] = int(weight)
 
         return array/array.sum()
-            
+
 def main():
 
     global chaine # séquence d'états qui ont été faits
@@ -73,7 +74,7 @@ def main():
     etats = {}
     chaine = []
 
-    lexer = gramLexer(FileStream("MDP-parser/ex.mdp"))
+    lexer = gramLexer(FileStream("ex.mdp"))
     stream = CommonTokenStream(lexer)
     parser = gramParser(stream)
     tree = parser.program()
@@ -97,7 +98,11 @@ def main():
 
 
     print([k.nom for k in chaine])
-
+    
+    # print_graph()
+    print_graph2()
+    
+    
 def simulation_choice(etats, n = 10):
 
     chaine.append(min(etats.values(), key=lambda obj: obj.id))
