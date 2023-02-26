@@ -1,3 +1,6 @@
+.idea/*
+test.png
+test2.png
 MDP-parser/__pycache__/*
 MDP-parser/mc.dot
 MDP-parser/*.ps;
