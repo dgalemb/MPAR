@@ -71,9 +71,11 @@ def main():
 
     global chaine  # séquence d'états qui ont été faits
     global etats
+    global decisions
 
     etats = {}
     chaine = []
+    decisions = []
 
     lexer = gramLexer(FileStream("MDP-parser/ex.mdp"))
     stream = CommonTokenStream(lexer)
@@ -83,12 +85,7 @@ def main():
     walker = ParseTreeWalker()
     p = walker.walk(printer, tree)
 
-    print("-" * 10)
-    print(f"etats: {etats}")
-    print("-" * 10)
-    print(f"chaine: {chaine}")
-    print("-" * 10)
-
+    print_graph(etats)
 
     print('Would you like to simulate it by choosing each action, simulating randomly or defining a positional opponent? Type 1 or 2 or 3 respectively.')
     choice = int(input('Your choice (1 or 2 or 3):'))
@@ -107,8 +104,6 @@ def main():
     print([k.nom for k in chaine])  # print all selected states
     
     # print_graph()
-    # print_graph2()
-    print_graph3()
     
     
 def simulation_choice(etats, n=10):
@@ -128,7 +123,6 @@ def simulation_choice(etats, n=10):
 
             arrival_id = choose_state(transitions)
             filtered_dict = {k: v for k, v in etats.items() if v.id == arrival_id}
-
 
         else:
 

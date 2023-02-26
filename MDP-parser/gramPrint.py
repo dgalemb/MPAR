@@ -1,15 +1,95 @@
-from __future__ import division  # Only for how I'm writing the transition matrix
-import networkx as nx  # For the magic
-import matplotlib.pyplot as plt  # For plotting
+import networkx as nx
+import matplotlib.pyplot as plt
 
-import numpy as np
-import pandas as pd
-# import networkx as nx
-# from networkx.drawing.nx_agraph import write_dot
-import matplotlib.pyplot as pl
 
-def print_graph():
-    pass
+def list_to_dict(nom_etats, liste):
+    # print("hola")
+    # print(nom_etats)
+    # print(liste)
+    # print("---")
+    dictionary = dict()
+    for nom_i in range(len(nom_etats)):
+        dictionary[nom_etats[nom_i]] = liste[nom_i]
+    return dictionary
+
+
+def size_edges(states):
+    n_states = len(states)
+    if n_states == 2:
+        return 4
+    elif 3 <= n_states <= 5:
+        return 5
+    else:
+        return None
+
+
+def print_graph(etats):
+    # Define the states
+    states = list(etats.keys())
+    # print(f"S0: {etats['S0'].have_decision},  {etats['S0'].transitions}")
+    # print(f"S1: {etats['S1'].have_decision},  {etats['S1'].transitions}")
+    # print(f"S2: {etats['S2'].have_decision},  {etats['S2'].transitions}")
+
+    # Define the actions
+    color_actions = ['blue', 'green', 'magenta', 'cyan', 'red', 'yellow']
+    actions = dict()
+
+    actual_state_color = '#606060'
+
+
+    # Define the transition probabilities
+    P = dict()
+    # print(etats)
+    for etat in states:
+        print(etat)
+        if etats[etat].have_decision:
+            P[etat] = dict()
+            for action, probs in etats[etat].transitions.items():
+                P[etat][action] = list_to_dict(states, probs)
+        else:
+            P[etat] = list_to_dict(states, etats[etat].transitions['MC'])
+    # print(P)
+
+    # Create the graph
+    G = nx.MultiDiGraph()
+
+    # Add the states as nodes
+    G.add_nodes_from(states, size=5)
+
+    s_edges = size_edges(states)
+
+    # Add the actions as edges
+    for state in states:
+        if list(P[state].keys())[0] not in states:  # if there are actions
+            for action in P[state].keys():
+                if action not in list(actions.keys()):
+                    actions[action] = color_actions.pop(0)  # to choose one color for the action
+                for next_state in P[state][action]:
+                    prob = P[state][action][next_state]
+                    if prob > 0:
+                        G.add_edge(state, next_state, key=f"{action}", label=f"{action} ({prob:.2f})", len=s_edges, color=actions[action], font_size=5)
+        else:
+            for next_state in P[state]:
+                prob = P[state][next_state]
+                if prob > 0:
+                    G.add_edge(state, next_state, label=f"({prob:.2f})", len=4, color='black')
+
+    B = to_agraph(G)
+    B.layout()
+    B.draw('test2.png')
+
+    # # Setting up node color for each iteration
+    # for k in range(N_steps):
+    #     for i, n in enumerate(G.nodes(data=True)):
+    #         if i == node_sel[k]:
+    #             n[1]['fillcolor'] = 'blue'
+    #         else:
+    #             n[1]['fillcolor'] = 'white'
+    #
+    #     A = to_agraph(G)
+    #     A.layout()
+    #     A.draw('net_' + str(k) + '.png')
+
 
 def print_graph2():
     G = nx.Graph()
@@ -103,55 +183,7 @@ import imageio
 
 
 
-import networkx as nx
-import matplotlib.pyplot as plt
 
-# Define the states
-states = ["S0", "S1", "S2"]
-
-# Define the actions
-actions = ["a", "b"]
-color_actions = ['blue', 'green', 'red', 'cyan', 'magenta', 'yellow']
-actual_state_color = '#606060'
-
-# Define the transition probabilities
-P = {
-    "S0": {
-        "S0": 0.3, "S1": 0.7
-    },
-    "S1": {
-        "a": {"S0": 0.6, "S1": 0.4},
-        "b": {"S1": 0.2, "S2": 0.8},
-    },
-    "S2": {
-        "a": {"S0": 0.5, "S1": 0.5},
-        "b": {"S1": 0.9, "S2": 0.1},
-    },
-}
-
-# Create the graph
-G = nx.DiGraph()
-
-# Add the states as nodes
-G.add_nodes_from(states)
-
-# Add the actions as edges
-for state in states:
-    if list(P[state].keys())[0] in actions:  # if there are actions
-        for action in actions:
-            for next_state in P[state][action]:
-                prob = P[state][action][next_state]
-                if prob > 0:
-                    G.add_edge(state, next_state, label=f"{action} ({prob:.2f})", len=4)
-    else:
-        for next_state in P[state]:
-            prob = P[state][next_state]
-            if prob > 0:
-                G.add_edge(state, next_state, label=f"({prob:.2f})", len=4, color='black')
-
-B = to_agraph(G)
-B.layout()
-B.draw('test2.png')
 
 # Draw the graph
 # pos = nx.spring_layout(G)
