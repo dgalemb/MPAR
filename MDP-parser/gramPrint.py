@@ -1,5 +1,8 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+from networkx.drawing.nx_agraph import to_agraph
+import numpy as np
+import imageio
 
 
 def list_to_dict(nom_etats, liste):
@@ -72,23 +75,17 @@ def print_graph(etats):
             for next_state in P[state]:
                 prob = P[state][next_state]
                 if prob > 0:
-                    G.add_edge(state, next_state, label=f"({prob:.2f})", len=4, color='black')
+                    G.add_edge(state, next_state, key=f"{prob}", label=f"({prob:.2f})", len=s_edges, color='black')
 
-    B = to_agraph(G)
-    B.layout()
-    B.draw('test2.png')
+    for i, n in enumerate(G.nodes(data=True)):
+        print(i, n)
 
-    # # Setting up node color for each iteration
-    # for k in range(N_steps):
-    #     for i, n in enumerate(G.nodes(data=True)):
-    #         if i == node_sel[k]:
-    #             n[1]['fillcolor'] = 'blue'
-    #         else:
-    #             n[1]['fillcolor'] = 'white'
-    #
-    #     A = to_agraph(G)
-    #     A.layout()
-    #     A.draw('net_' + str(k) + '.png')
+    for i, n in enumerate(G.edges(data=True)):
+        print(i, n)
+
+    # B = to_agraph(G)
+    # B.layout()
+    # B.draw('test2.png')
 
 
 def print_graph2():
@@ -121,11 +118,6 @@ def print_graph2():
 
 
 # Gif :
-import networkx as nx
-from networkx.drawing.nx_agraph import to_agraph
-import numpy as np
-import imageio
-
 # # Markov chain parameters
 # states = [(0, 0),
 #           (1, 0),
