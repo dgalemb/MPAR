@@ -189,21 +189,25 @@ def simulation_adv(etats, adv, G_print, n=10):
     chaine.append(min(etats.values(), key=lambda obj: obj.id))
     departure = chaine[-1]
     print_id = ""
+    id_image = 0
+
+    create_image_by_id(departure.nom, G_print, id_image)
 
     for k in range(n):
-
+        id_image += 2
         print(f'The current state is {departure.nom}')
         print_id = departure.nom
+
         if departure.have_decision:
 
             key = adv[departure.nom]
             transitions = departure.transitions[key]
             print(f'The action {key} has been chosen by the opponent')
 
+            print_id += key
+
             arrival_id = choose_state(transitions)
             filtered_dict = {k: v for k, v in etats.items() if v.id == arrival_id}
-
-            print_id += key
 
         else:
 
@@ -216,7 +220,7 @@ def simulation_adv(etats, adv, G_print, n=10):
         departure = obj[0]
         print_id += departure.nom
         print(f"print_id = {print_id}")
-
+        create_image_by_id(print_id, G_print, id_image)
         chaine.append(departure)
 
 
@@ -234,7 +238,9 @@ def define_adversaire(etats):
     for etat in etat_choices:
         print(f'For the state {etat.nom} the choices are: {list(etat.transitions.keys())} with the respective probabilities {list(etat.transitions.values())}')
         adv[etat.nom] = str(input('Your choice for your adversiare is: '))
-    
+
+    print(f"Etats choisis = {etat_choices}")
+
     return adv
 
 
