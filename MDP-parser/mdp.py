@@ -2,7 +2,7 @@ from antlr4 import *
 from gramLexer import gramLexer
 from gramListener import gramListener
 from gramParser import gramParser
-from gramPrint import print_graph
+from gramPrint import print_graph, create_image_by_id
 import sys
 
 import numpy as np
@@ -28,7 +28,7 @@ class gramPrintListener(gramListener):
         # self.props['etats'] = ([str(x) for x in ctx.ID()])
 
         for etat, id in zip([str(x) for x in ctx.ID()], range(len([str(x) for x in ctx.ID()]))):
-            etats[etat] = (Etat(nom=etat, id = id, transitions = {}))
+            etats[etat] = (Etat(nom=etat, id=id, transitions={}))
 
     def enterDefactions(self, ctx):
         # print("Actions: %s" % str([str(x) for x in ctx.ID()]))
@@ -77,7 +77,7 @@ def main():
     chaine = []
     decisions = []
 
-    lexer = gramLexer(FileStream("MDP-parser/ex.mdp"))
+    lexer = gramLexer(FileStream("ex.mdp"))
     stream = CommonTokenStream(lexer)
     parser = gramParser(stream)
     tree = parser.program()
@@ -85,7 +85,7 @@ def main():
     walker = ParseTreeWalker()
     p = walker.walk(printer, tree)
 
-    print_graph(etats)
+    G = print_graph(etats)
 
     print('Would you like to simulate it by choosing each action, simulating randomly or defining a positional opponent? Type 1 or 2 or 3 respectively.')
     choice = int(input('Your choice (1 or 2 or 3):'))
@@ -96,14 +96,12 @@ def main():
     if choice == 1:
         simulation_choice(etats, n)
     elif choice == 2:
-        simulation_rand(etats, n)
+        simulation_rand(etats, G, n)
     else:
         adv = define_adversaire(etats)
         simulation_adv(etats, adv, n)
 
     print([k.nom for k in chaine])  # print all selected states
-    
-    # print_graph()
     
     
 def simulation_choice(etats, n=10):
@@ -136,20 +134,27 @@ def simulation_choice(etats, n=10):
         chaine.append(departure)
 
 
-def simulation_rand(etats, n=10):
+def simulation_rand(etats, G_print, n=10):
 
     chaine.append(min(etats.values(), key=lambda obj: obj.id))
-    departure = chaine[-1]
+    departure = chaine[-1]  # S0 object state
+    print_id = ""
+    id_image = 0
+
+    create_image_by_id(departure.nom, G_print, id_image)
 
     for k in range(n):
-
+        id_image += 2
         print(f'The current state is {departure.nom}')
+        print_id = departure.nom
 
         if departure.have_decision:
 
             random_key = random.choice(list(departure.transitions.keys()))
             random_transitions = departure.transitions[random_key]
             print(f'The action {random_key} has been chosen')
+
+            print_id += random_key
 
             arrival_id = choose_state(random_transitions)
             filtered_dict = {k: v for k, v in etats.items() if v.id == arrival_id}
@@ -163,17 +168,21 @@ def simulation_rand(etats, n=10):
 
         obj = [k for k in filtered_dict.values()]
         departure = obj[0]
+        print_id += departure.nom
+        print(f"print_id = {print_id}")
+        create_image_by_id(print_id, G_print, id_image)
         chaine.append(departure)
 
 
 def simulation_adv(etats, adv, n=10):
     chaine.append(min(etats.values(), key=lambda obj: obj.id))
     departure = chaine[-1]
+    print_id = ""
 
     for k in range(n):
 
         print(f'The current state is {departure.nom}')
-
+        print_id = departure.nom
         if departure.have_decision:
 
             key = adv[departure.nom]
@@ -182,6 +191,8 @@ def simulation_adv(etats, adv, n=10):
 
             arrival_id = choose_state(transitions)
             filtered_dict = {k: v for k, v in etats.items() if v.id == arrival_id}
+
+            print_id += key
 
         else:
 
@@ -192,6 +203,9 @@ def simulation_adv(etats, adv, n=10):
 
         obj = [k for k in filtered_dict.values()]
         departure = obj[0]
+        print_id += departure.nom
+        print(f"print_id = {print_id}")
+
         chaine.append(departure)
 
 

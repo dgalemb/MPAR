@@ -6,10 +6,6 @@ import imageio
 
 
 def list_to_dict(nom_etats, liste):
-    # print("hola")
-    # print(nom_etats)
-    # print(liste)
-    # print("---")
     dictionary = dict()
     for nom_i in range(len(nom_etats)):
         dictionary[nom_etats[nom_i]] = liste[nom_i]
@@ -26,6 +22,34 @@ def size_edges(states):
         return None
 
 
+def create_image_by_id(id_, g_print, id_image):
+    for i, n in enumerate(g_print.edges(data=True)):
+        if n[-1]['id'] == id_:
+            n[-1]['color'] = 'green'
+        else:
+            n[-1]['color'] = 'black'
+        # print(i, n)
+
+    save_image(g_print, id_image)
+
+    id_ = id_[-2:]
+    for i, n in enumerate(g_print.nodes(data=True)):
+        if n[-1]['id'] == id_:
+            n[-1]['fillcolor'] = 'green'
+        else:
+            n[-1]['fillcolor'] = 'white'
+        # print(i, n)
+
+    save_image(g_print, id_image + 1)
+
+
+def save_image(g_print, id_):
+    A = to_agraph(g_print)
+    A.layout()
+    name_image = f"image_{id_}.png"
+    A.draw('tmp/' + name_image)
+
+
 def print_graph(etats):
     # Define the states
     states = list(etats.keys())
@@ -34,17 +58,15 @@ def print_graph(etats):
     # print(f"S2: {etats['S2'].have_decision},  {etats['S2'].transitions}")
 
     # Define the actions
-    color_actions = ['blue', 'green', 'magenta', 'cyan', 'red', 'yellow']
+    color_actions = ['blue', 'magenta', 'cyan', 'red', 'yellow']
     actions = dict()
 
     actual_state_color = '#606060'
-
 
     # Define the transition probabilities
     P = dict()
     # print(etats)
     for etat in states:
-        print(etat)
         if etats[etat].have_decision:
             P[etat] = dict()
             for action, probs in etats[etat].transitions.items():
@@ -57,7 +79,8 @@ def print_graph(etats):
     G = nx.MultiDiGraph()
 
     # Add the states as nodes
-    G.add_nodes_from(states, size=5)
+    # G.add_nodes_from(states, size=5)
+    [G.add_node(s, id=s, style='filled', fillcolor='white', shape='circle', fixedsize='true', width=1) for s in states]
 
     s_edges = size_edges(states)
 
@@ -70,22 +93,15 @@ def print_graph(etats):
                 for next_state in P[state][action]:
                     prob = P[state][action][next_state]
                     if prob > 0:
-                        G.add_edge(state, next_state, key=f"{action}", label=f"{action} ({prob:.2f})", len=s_edges, color=actions[action], font_size=5)
+                        G.add_edge(state, next_state, id=f"{state}{action}{next_state}", label=f"{action} ({prob:.2f})", len=s_edges, color=actions[action], font_size=5)
         else:
             for next_state in P[state]:
                 prob = P[state][next_state]
                 if prob > 0:
-                    G.add_edge(state, next_state, key=f"{prob}", label=f"({prob:.2f})", len=s_edges, color='black')
+                    G.add_edge(state, next_state, id=f"{state}{next_state}", label=f"({prob:.2f})", len=s_edges, color='black')
 
-    for i, n in enumerate(G.nodes(data=True)):
-        print(i, n)
-
-    for i, n in enumerate(G.edges(data=True)):
-        print(i, n)
-
-    # B = to_agraph(G)
-    # B.layout()
-    # B.draw('test2.png')
+    save_image(G, 'init')
+    return G
 
 
 def print_graph2():
