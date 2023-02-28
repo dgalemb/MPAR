@@ -106,12 +106,9 @@ def load_mdp(path_to_mdp):
 
 def simulation_choice_decision(etats, G_print, id_image, key):
     departure = chaine[-1]
-    # print_id = ""
 
     print_id = departure.nom
 
-    # print(f'You have the action(s) {list(departure.transitions.keys())} as choices')
-    # key = str(input('Enter your choice:'))
     transitions = departure.transitions[key]
 
     print_id += key  # add action to the id
@@ -122,7 +119,6 @@ def simulation_choice_decision(etats, G_print, id_image, key):
     obj = [k for k in filtered_dict.values()]
     departure = obj[0]
     print_id += departure.nom
-    # print(f"print_id = {print_id}")
     create_image_by_id(print_id, G_print, id_image)
     chaine.append(departure)
 
@@ -155,30 +151,10 @@ def simulation_choice(etats, G_print, id_image=None):
 
         if departure.have_decision:
             return 'decision', list(departure.transitions.keys())
-            # print(f'You have the action(s) {} as choices')
-    #         key = str(input('Enter your choice:'))
-    #         transitions = departure.transitions[key]
-    #
-    #         print_id += key  # add action to the id
-    #
-    #         arrival_id = choose_state(transitions)
-    #         filtered_dict = {k: v for k, v in etats.items() if v.id == arrival_id}
-    #
+
         else:
             # simulation_choice_normal(etats, G_print, id_image)
             return 'normal', []
-    #
-    #         transitions = departure.transitions['MC']
-    #
-    #         arrival_id = choose_state(transitions)
-    #         filtered_dict = {k: v for k, v in etats.items() if v.id == arrival_id}
-    #
-    #     obj = [k for k in filtered_dict.values()]
-    #     departure = obj[0]
-    #     print_id += departure.nom
-    #     # print(f"print_id = {print_id}")
-    #     create_image_by_id(print_id, G_print, id_image)
-    #     chaine.append(departure)
 
 
 def simulation_rand(etats, G_print, n=10):
@@ -254,7 +230,6 @@ def simulation_adv(etats, adv, G_print, n=10):
         obj = [k for k in filtered_dict.values()]
         departure = obj[0]
         print_id += departure.nom
-        print(f"print_id = {print_id}")
         create_image_by_id(print_id, G_print, id_image)
         chaine.append(departure)
 
@@ -265,16 +240,16 @@ def choose_state(weights):
     return choice[0]
 
 
-def define_adversaire(etats):
-    adv = {}
-
-    etat_choices = [k for k in etats.values() if k.have_decision]
-    for etat in etat_choices:
-        print(
-            f'For the state {etat.nom} the choices are: {list(etat.transitions.keys())} with the respective probabilities {list(etat.transitions.values())}')
-        adv[etat.nom] = str(input('Your choice for your adversiare is: '))
-
-    print(f"Etats choisis = {etat_choices}")
-
-    return adv
+# def define_adversaire(etats):
+#     adv = {}
+#
+#     etat_choices = [k for k in etats.values() if k.have_decision]
+#     for etat in etat_choices:
+#         print(
+#             f'For the state {etat.nom} the choices are: {list(etat.transitions.keys())} with the respective probabilities {list(etat.transitions.values())}')
+#         adv[etat.nom] = str(input('Your choice for your adversiare is: '))
+#
+#     print(f"Etats choisis = {etat_choices}")
+#
+#     return adv
 

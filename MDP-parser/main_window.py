@@ -11,7 +11,7 @@ import pyqtgraph.opengl as gl
 import numpy as np
 from pathlib import Path
 
-from backend import Etat, gramPrintListener, load_mdp, simulation_rand, simulation_choice, simulation_choice_normal, simulation_choice_decision
+from backend import Etat, gramPrintListener, load_mdp, simulation_rand, simulation_choice, simulation_choice_normal, simulation_choice_decision, simulation_adv
 
 
 window_name, base_class = uic.loadUiType("main-window.ui")
@@ -20,10 +20,7 @@ window_name, base_class = uic.loadUiType("main-window.ui")
 class MainWindow(window_name, base_class):
 
     main_window_back_signal = pyqtSignal()
-    # open_about_window_signal = pyqtSignal()
-    # open_help_documentation_window_signal = pyqtSignal()
     file_path_stl_signal = pyqtSignal(str)
-    # create_gcode_signal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -43,6 +40,9 @@ class MainWindow(window_name, base_class):
         self.next_image = None
         # self.previous_image = None
 
+        self.etats_with_decision = None
+        self.adv = {}
+
     def init_gui(self):
 
         self.actionOpen_File.triggered.connect(self.showDialog)
@@ -50,7 +50,7 @@ class MainWindow(window_name, base_class):
         self.btn_folder.clicked.connect(self.showDialog)
         self.btn_each_action.clicked.connect(self.each_action_print)
         self.btn_random_simulation.clicked.connect(self.random_simulation_print)
-        # self.btn_pos_opponent.clicked.connect(self.)
+        self.btn_pos_opponent.clicked.connect(self.adversaire_print)
         self.btn_next_image.clicked.connect(self.show_next_image)
         self.btn_previous_image.clicked.connect(self.show_previous_image)
 
@@ -61,24 +61,17 @@ class MainWindow(window_name, base_class):
         self.btn_each_action_next.hide()
         self.btn_each_action_next.clicked.connect(self.create_new_image)
 
+        # adv
+        self.label_create_adv.hide()
+        self.label_state_options.hide()
+        self.label_etat.hide()
+        self.box_actions_adv.hide()
+        self.btn_accept_action_adv.hide()
+        self.btn_accept_action_adv.clicked.connect(self.action_adv_choosen)
+        self.label_prob.hide()
+        self.label_action_probabilities.hide()
 
-        # btn.setFont(QFont("Ricty Diminished", 14))
-        # layout2.addWidget(btn)
-        #
-        # btn1 = QPushButton(text="Hola 1")
-        # btn1.setFont(QFont("Ricty Diminished", 14))
-        # layout.addWidget(btn1)
 
-        # self.viewer = gl.GLViewWidget()
-        # layout.addWidget(self.viewer, 1)
-        #
-        # self.viewer.setWindowTitle('STL Viewer')
-        # self.viewer.setCameraPosition(distance=80)
-        #
-        # g = gl.GLGridItem()
-        # g.setSize(200, 200)
-        # g.setSpacing(5, 5)
-        # self.viewer.addItem(g)
         self.hide_options()
         self.clean_tmp()
         self.btn_next_image.hide()
@@ -129,9 +122,6 @@ class MainWindow(window_name, base_class):
         # The signal with the path is emitted
         self.file_path_stl_signal.emit(fname[0])
         if fname[0]:
-            # self.showSTL(fname[0])
-            # self.lastDir = Path(fname[0]).parent
-            # print(fname[0])
             self.etats, self. G = load_mdp(fname[0])
             self.add_init_image_to_screen()
             self.show_options()
@@ -157,15 +147,6 @@ class MainWindow(window_name, base_class):
             self.image_name.setText(self.current_image[self.current_image.find('image_'):self.current_image.find('.')])
         # else:
         #     self.btn_next_image.hide()
-
-    # def add_selected_image(self):
-    #     directory = os.path.dirname(os.path.abspath(__file__)) + r'\tmp'
-    #     files_in_directory = os.listdir(directory)
-    #     filtered_files = [file for file in files_in_directory if file.endswith(".png")]
-    #     if len(filtered_files) < 2 * self.n_transitions + 3:
-    #         # crear imagenes
-    #         # mostrar roulette
-    #         pass
 
     def decision_taken(self):
         directory = os.path.dirname(os.path.abspath(__file__)) + r'\tmp'
@@ -194,7 +175,6 @@ class MainWindow(window_name, base_class):
                 self.box_actions.show()
                 self.btn_accept_choice.show()
             elif decision_possible == 'normal':
-                print(f"actual_image_number = {actual_image_number}")
                 simulation_choice_normal(self.etats, self.G, actual_image_number)
                 self.show_image_created(actual_image_number)
         else:
@@ -248,40 +228,64 @@ class MainWindow(window_name, base_class):
                 images_created = True
                 self.show_images_roullette()
 
-    def dragEnterEvent(self, e):
-        print("enter")
-        mimeData = e.mimeData()
-        mimeList = mimeData.formats()
-        filename = None
+    def show_adv_option(self):
+        action = self.etats_with_decision.pop(0)
+        self.label_etat.setText(action.nom)
+        self.box_actions_adv.clear()
+        self.box_actions_adv.addItems(list(action.transitions.keys()))
+        self.label_action_probabilities.setText(', '.join(list(action.transitions.keys())) + ' = ' + ', '.join(map(str, list(action.transitions.values()))))
 
-        if "text/uri-list" in mimeList:
-            filename = mimeData.data("text/uri-list")
-            filename = str(filename, encoding="utf-8")
-            filename = filename.replace("file:///", "").replace("\r\n", "").replace("%20", " ")
-            filename = Path(filename)
-
-        if filename.exists() and filename.suffix == ".stl":
-            e.accept()
-            self.droppedFilename = filename
+    def action_adv_choosen(self):
+        self.adv[self.label_etat.text()] = self.box_actions_adv.currentText()
+        if len(self.etats_with_decision) > 0:
+            self.label_state_options.show()
+            self.label_etat.show()
+            self.box_actions_adv.show()
+            self.btn_accept_action_adv.show()
+            self.label_prob.show()
+            self.label_action_probabilities.show()
+            self.show_adv_option()
         else:
-            e.ignore()
-            self.droppedFilename = None
+            self.label_create_adv.hide()
+            self.label_state_options.hide()
+            self.label_etat.hide()
+            self.box_actions_adv.hide()
+            self.btn_accept_action_adv.hide()
+            self.label_prob.hide()
+            self.label_action_probabilities.hide()
 
-    def dropEvent(self, e):
-        if self.droppedFilename:
-            self.showSTL(self.droppedFilename)
+            simulation_adv(self.etats, self.adv, self.G, self.n_transitions)
+            # verify creation of images
+            directory = os.path.dirname(os.path.abspath(__file__)) + r'\tmp'
 
+            images_created = False
+
+            while not images_created:
+                files_in_directory = os.listdir(directory)
+                filtered_files = [file for file in files_in_directory if file.endswith(".png")]
+                if len(filtered_files) == 2 * self.n_transitions + 3:
+                    images_created = True
+                    self.show_images_roullette()
+
+    def adversaire_print(self):
+        self.option_selected()
+        self.etats_with_decision = [k for k in self.etats.values() if k.have_decision]
+
+        self.label_create_adv.show()
+        self.label_state_options.show()
+        self.label_etat.show()
+        self.box_actions_adv.show()
+        self.btn_accept_action_adv.show()
+        self.label_prob.show()
+        self.label_action_probabilities.show()
+
+        self.show_adv_option()
 
     def show_up(self):
         self.show()
 
-    # def send_process_gcode_order(self):
-    #     self.create_gcode_signal.emit()
-
 
 if __name__ == '__main__':
-
-    # sys.__excepthook__ = hook
     app = QApplication(sys.argv)
 
     # windows instances
