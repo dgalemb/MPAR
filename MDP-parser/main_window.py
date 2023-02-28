@@ -11,7 +11,7 @@ import pyqtgraph.opengl as gl
 import numpy as np
 from pathlib import Path
 
-from backend import Etat, gramPrintListener, load_mdp, simulation_rand
+from backend import Etat, gramPrintListener, load_mdp, simulation_rand, simulation_choice, simulation_choice_normal, simulation_choice_decision
 
 
 window_name, base_class = uic.loadUiType("main-window.ui")
@@ -41,18 +41,26 @@ class MainWindow(window_name, base_class):
 
         self.current_image = None
         self.next_image = None
-        self.previous_image = None
+        # self.previous_image = None
 
     def init_gui(self):
 
         self.actionOpen_File.triggered.connect(self.showDialog)
 
         self.btn_folder.clicked.connect(self.showDialog)
-        # self.btn_each_action.clicked.connect(self.)
+        self.btn_each_action.clicked.connect(self.each_action_print)
         self.btn_random_simulation.clicked.connect(self.random_simulation_print)
         # self.btn_pos_opponent.clicked.connect(self.)
         self.btn_next_image.clicked.connect(self.show_next_image)
         self.btn_previous_image.clicked.connect(self.show_previous_image)
+
+        self.label_select_action.hide()
+        self.box_actions.hide()
+        self.btn_accept_choice.clicked.connect(self.decision_taken)
+        self.btn_accept_choice.hide()
+        self.btn_each_action_next.hide()
+        self.btn_each_action_next.clicked.connect(self.create_new_image)
+
 
         # btn.setFont(QFont("Ricty Diminished", 14))
         # layout2.addWidget(btn)
@@ -149,6 +157,72 @@ class MainWindow(window_name, base_class):
             self.image_name.setText(self.current_image[self.current_image.find('image_'):self.current_image.find('.')])
         # else:
         #     self.btn_next_image.hide()
+
+    # def add_selected_image(self):
+    #     directory = os.path.dirname(os.path.abspath(__file__)) + r'\tmp'
+    #     files_in_directory = os.listdir(directory)
+    #     filtered_files = [file for file in files_in_directory if file.endswith(".png")]
+    #     if len(filtered_files) < 2 * self.n_transitions + 3:
+    #         # crear imagenes
+    #         # mostrar roulette
+    #         pass
+
+    def decision_taken(self):
+        directory = os.path.dirname(os.path.abspath(__file__)) + r'\tmp'
+        files_in_directory = os.listdir(directory)
+        filtered_files = [file for file in files_in_directory if file.endswith(".png")]
+        actual_image_number = int((len(filtered_files) - 1))
+        simulation_choice_decision(self.etats, self.G, actual_image_number, self.box_actions.currentText())
+        self.show_image_created(actual_image_number)
+        self.label_select_action.hide()
+        self.box_actions.clear()
+        self.box_actions.hide()
+        self.btn_accept_choice.hide()
+        self.btn_each_action_next.show()
+
+    def create_new_image(self):
+        directory = os.path.dirname(os.path.abspath(__file__)) + r'\tmp'
+        files_in_directory = os.listdir(directory)
+        filtered_files = [file for file in files_in_directory if file.endswith(".png")]
+        if len(filtered_files) < 2 * self.n_transitions + 3:
+            actual_image_number = int((len(filtered_files) - 1))
+            decision_possible, actions = simulation_choice(self.etats, self.G)
+            if decision_possible == 'decision':
+                self.btn_each_action_next.hide()
+                self.label_select_action.show()
+                self.box_actions.addItems(actions)
+                self.box_actions.show()
+                self.btn_accept_choice.show()
+            elif decision_possible == 'normal':
+                print(f"actual_image_number = {actual_image_number}")
+                simulation_choice_normal(self.etats, self.G, actual_image_number)
+                self.show_image_created(actual_image_number)
+        else:
+            self.btn_each_action_next.hide()
+            self.btn_next_image.show()
+            self.btn_previous_image.show()
+
+    def show_image_created(self, image_number):
+        directory = os.path.dirname(os.path.abspath(__file__)) + r'\tmp'
+        image_created = False
+        self.btn_each_action_next.setEnabled(False)
+        while not image_created:
+            files_in_directory = os.listdir(directory)
+            filtered_files = [file for file in files_in_directory if file.endswith(".png")]
+            if 'image_' + str(image_number) + '.png' in filtered_files:
+                image_created = True
+                self.current_image = os.path.dirname(os.path.abspath(__file__)) + r'\tmp\image_' + f'{image_number + 1}.png'
+                pixmap = QPixmap(self.current_image)
+                self.label_image_next.setPixmap(pixmap)
+                self.image_name.setText(f'image_{image_number+1}')
+                self.btn_each_action_next.setEnabled(True)
+
+    def each_action_print(self):
+        self.option_selected()
+        simulation_choice(self.etats, self.G, 0)
+        self.btn_each_action_next.show()
+
+        self.show_image_created(0)
 
     def show_images_roullette(self):
         self.current_image = os.path.dirname(os.path.abspath(__file__)) + r'\tmp\image_0.png'

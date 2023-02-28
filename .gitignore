@@ -5,3 +5,4 @@ MDP-parser/__pycache__/*
 MDP-parser/mc.dot
 MDP-parser/*.ps;
 MDP-parser/tmp/*.png
+MDP-parser/.idea
