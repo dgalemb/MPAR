@@ -17,10 +17,11 @@ class Etat():
         self.transitions = transitions  # Dictionaire:  transitions[decision] = ligne matrice
         self.have_decision = False
 
+
 class gramPrintListener(gramListener):
 
     def __init__(self, dictt={'transact_type1': [], 'transact_type2': [], 'actions': [], 'etats': []}):
-        #self.props = dictt
+        # self.props = dictt
         pass
 
     def enterDefstates(self, ctx):
@@ -45,7 +46,7 @@ class gramPrintListener(gramListener):
 
         etats[dep].transitions[act] = self.make_weights(ids, weights)
         etats[dep].have_decision = True
-    
+
     def enterTransnoact(self, ctx):
         ids = [str(x) for x in ctx.ID()]
         dep = ids.pop(0)
@@ -60,15 +61,13 @@ class gramPrintListener(gramListener):
         array = np.zeros(len(etats))
 
         for arrival, weight in zip(arrivals, weights):
-
             id = etats[arrival].id
             array[id] = int(weight)
 
-        return array/array.sum()
+        return array / array.sum()
 
 
-def main():
-
+def load_mdp(path_to_mdp):
     global chaine  # séquence d'états qui ont été faits
     global etats
     global decisions
@@ -77,7 +76,7 @@ def main():
     chaine = []
     decisions = []
 
-    lexer = gramLexer(FileStream("ex.mdp"))
+    lexer = gramLexer(FileStream(path_to_mdp))
     stream = CommonTokenStream(lexer)
     parser = gramParser(stream)
     tree = parser.program()
@@ -86,67 +85,79 @@ def main():
     p = walker.walk(printer, tree)
 
     G = print_graph(etats)
+    return etats, G
 
-    print('Would you like to simulate it by choosing each action, simulating randomly or defining a positional opponent? Type 1 or 2 or 3 respectively.')
-    choice = int(input('Your choice (1 or 2 or 3):'))
+    # print(
+    #     'Would you like to simulate it by choosing each action, simulating randomly or defining a positional opponent? Type 1 or 2 or 3 respectively.')
+    # choice = int(input('Your choice (1 or 2 or 3):'))
+    #
+    # print('For how many transitions would you like to simulate?')
+    # n = int(input('Your choice (default is 10):'))
+    #
+    # if choice == 1:
+    #     simulation_choice(etats, G, n)
+    # elif choice == 2:
+    #     simulation_rand(etats, G, n)
+    # else:
+    #     adv = define_adversaire(etats)
+    #     simulation_adv(etats, adv, G, n)
+    #
+    # print([k.nom for k in chaine])  # print all selected states
 
-    print('For how many transitions would you like to simulate?')
-    n = int(input('Your choice (default is 10):'))
-
-    if choice == 1:
-        simulation_choice(etats, G, n)
-    elif choice == 2:
-        simulation_rand(etats, G, n)
-    else:
-        adv = define_adversaire(etats)
-        simulation_adv(etats, adv, G, n)
-
-    print([k.nom for k in chaine])  # print all selected states
-    
-    
-def simulation_choice(etats,G_print, n=10):
-
-    chaine.append(min(etats.values(), key=lambda obj: obj.id))
+def simulation_choice_decision(etats, G_print, id_image, key):
     departure = chaine[-1]
 
-    print_id = ""
-    id_image = 0
+    print_id = departure.nom
 
-    create_image_by_id(departure.nom, G_print, id_image)
+    transitions = departure.transitions[key]
 
-    for k in range(n):
-        id_image += 2
-        print(f'The current state is {departure.nom}')
-        print_id = departure.nom
+    print_id += key  # add action to the id
+
+    arrival_id = choose_state(transitions)
+    filtered_dict = {k: v for k, v in etats.items() if v.id == arrival_id}
+
+    obj = [k for k in filtered_dict.values()]
+    departure = obj[0]
+    print_id += departure.nom
+    create_image_by_id(print_id, G_print, id_image)
+    chaine.append(departure)
+
+def simulation_choice_normal(etats, G_print, id_image):
+    departure = chaine[-1]
+    # print_id = ""
+
+    print_id = departure.nom
+
+    transitions = departure.transitions['MC']
+
+    arrival_id = choose_state(transitions)
+    filtered_dict = {k: v for k, v in etats.items() if v.id == arrival_id}
+
+    obj = [k for k in filtered_dict.values()]
+    departure = obj[0]
+    print_id += departure.nom
+    # print(f"print_id = {print_id}")
+    create_image_by_id(print_id, G_print, id_image)
+    chaine.append(departure)
+
+def simulation_choice(etats, G_print, id_image=None):
+    if id_image == 0:
+        chaine.append(min(etats.values(), key=lambda obj: obj.id))
+        departure = chaine[-1]
+        create_image_by_id(departure.nom, G_print, id_image)
+        return None
+    else:
+        departure = chaine[-1]
 
         if departure.have_decision:
-
-            print(f'You have the action(s) {list(departure.transitions.keys())} as choices')
-            key = str(input('Enter your choice:'))
-            transitions = departure.transitions[key]
-
-            print_id += key  # add action to the id
-
-            arrival_id = choose_state(transitions)
-            filtered_dict = {k: v for k, v in etats.items() if v.id == arrival_id}
+            return 'decision', list(departure.transitions.keys())
 
         else:
-
-            transitions = departure.transitions['MC']
-
-            arrival_id = choose_state(transitions)
-            filtered_dict = {k: v for k, v in etats.items() if v.id == arrival_id}
-
-        obj = [k for k in filtered_dict.values()]
-        departure = obj[0]
-        print_id += departure.nom
-        print(f"print_id = {print_id}")
-        create_image_by_id(print_id, G_print, id_image)
-        chaine.append(departure)
+            # simulation_choice_normal(etats, G_print, id_image)
+            return 'normal', []
 
 
 def simulation_rand(etats, G_print, n=10):
-
     chaine.append(min(etats.values(), key=lambda obj: obj.id))
     departure = chaine[-1]  # S0 object state
     print_id = ""
@@ -219,7 +230,6 @@ def simulation_adv(etats, adv, G_print, n=10):
         obj = [k for k in filtered_dict.values()]
         departure = obj[0]
         print_id += departure.nom
-        print(f"print_id = {print_id}")
         create_image_by_id(print_id, G_print, id_image)
         chaine.append(departure)
 
@@ -230,19 +240,16 @@ def choose_state(weights):
     return choice[0]
 
 
-def define_adversaire(etats):
+# def define_adversaire(etats):
+#     adv = {}
+#
+#     etat_choices = [k for k in etats.values() if k.have_decision]
+#     for etat in etat_choices:
+#         print(
+#             f'For the state {etat.nom} the choices are: {list(etat.transitions.keys())} with the respective probabilities {list(etat.transitions.values())}')
+#         adv[etat.nom] = str(input('Your choice for your adversiare is: '))
+#
+#     print(f"Etats choisis = {etat_choices}")
+#
+#     return adv
 
-    adv = {}
-
-    etat_choices = [k for k in etats.values() if k.have_decision]
-    for etat in etat_choices:
-        print(f'For the state {etat.nom} the choices are: {list(etat.transitions.keys())} with the respective probabilities {list(etat.transitions.values())}')
-        adv[etat.nom] = str(input('Your choice for your adversiare is: '))
-
-    print(f"Etats choisis = {etat_choices}")
-
-    return adv
-
-
-if __name__ == '__main__':
-    main()
