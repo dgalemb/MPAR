@@ -5,10 +5,6 @@ from PyQt5.QtWidgets import QApplication, QLabel, QMessageBox, QWidget, QFrame, 
 from PyQt5.QtGui import QPixmap, QDrag, QPainter, QIcon, QFont, QImage
 from PyQt5.QtCore import pyqtSignal
 
-from pyqtgraph.Qt import QtCore, QtGui
-import pyqtgraph as pg
-import pyqtgraph.opengl as gl
-import numpy as np
 from pathlib import Path
 
 from backend import Etat, gramPrintListener, load_mdp, simulation_rand, simulation_choice, simulation_choice_normal, simulation_choice_decision, simulation_adv
