@@ -234,7 +234,7 @@ class MainWindow(window_name, base_class):
         self.label_etat.setText(action.nom)
         self.box_actions_adv.clear()
         self.box_actions_adv.addItems(list(action.transitions.keys()))
-        self.label_action_probabilities.setText(', '.join(list(action.transitions.keys())) + ' = ' + ', '.join(map(str, list(action.transitions.values()))))
+        #self.label_action_probabilities.setText(', '.join(list(action.transitions.keys())) + ' = ' + ', '.join(map(str, list(action.transitions.values()))))
 
     def action_adv_choosen(self):
         self.adv[self.label_etat.text()] = self.box_actions_adv.currentText()
@@ -243,8 +243,8 @@ class MainWindow(window_name, base_class):
             self.label_etat.show()
             self.box_actions_adv.show()
             self.btn_accept_action_adv.show()
-            self.label_prob.show()
-            self.label_action_probabilities.show()
+            #self.label_prob.show()
+            #self.label_action_probabilities.show()
             self.show_adv_option()
         else:
             self.label_create_adv.hide()
@@ -252,8 +252,8 @@ class MainWindow(window_name, base_class):
             self.label_etat.hide()
             self.box_actions_adv.hide()
             self.btn_accept_action_adv.hide()
-            self.label_prob.hide()
-            self.label_action_probabilities.hide()
+            #self.label_prob.hide()
+            #self.label_action_probabilities.hide()
 
             simulation_adv(self.etats, self.adv, self.G, self.n_transitions)
             # verify creation of images
@@ -277,8 +277,8 @@ class MainWindow(window_name, base_class):
         self.label_etat.show()
         self.box_actions_adv.show()
         self.btn_accept_action_adv.show()
-        self.label_prob.show()
-        self.label_action_probabilities.show()
+        #self.label_prob.show()
+        #self.label_action_probabilities.show()
 
         self.show_adv_option()
 
