@@ -50,8 +50,8 @@ class gramPrintListener(gramListener):
             etats[dep].have_decision = True
 
         except KeyError:
-
-            sys.exit('Less states have been declared than those who have been used to define transitions after, making it impossible to proceed. Please correct the .mdp file and retry.')
+            print('Less states have been declared than those who have been used to define transitions after, making it impossible to proceed. Please correct the .mdp file and retry.')
+            sys.exit()
 
 
 
@@ -76,7 +76,8 @@ class gramPrintListener(gramListener):
                 array[id] = int(weight)
 
             except KeyError:
-                sys.exit('Less states have been declared than those who have been used to define transitions after, making it impossible to proceed. Please correct the .mdp file and retry.')
+                print('Less states have been declared than those who have been used to define transitions after, making it impossible to proceed. Please correct the .mdp file and retry.')
+                sys.exit()
 
 
         return array/array.sum()
@@ -97,8 +98,9 @@ def load_mdp(path_to_mdp):
     printer = gramPrintListener()
     walker = ParseTreeWalker()
     p = walker.walk(printer, tree)
-
+    print("Hola")
     check_problems(etats)
+    print("Hola2")
 
     G = print_graph(etats)
     return etats, G
