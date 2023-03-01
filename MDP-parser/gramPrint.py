@@ -16,10 +16,10 @@ def size_edges(states):
     n_states = len(states)
     if n_states == 2:
         return 4
-    elif 3 <= n_states <= 5:
+    elif 3 <= n_states <= 4:
         return 5
     else:
-        return None
+        return 4
 
 
 def create_image_by_id(id_, g_print, id_image):
@@ -199,4 +199,3 @@ def print_graph2():
 # edge_labels = nx.get_edge_attributes(G, "label")
 # nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
 # plt.show()
-
