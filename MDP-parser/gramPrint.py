@@ -23,7 +23,9 @@ def size_edges(states):
 
 
 def create_image_by_id(id_, g_print, id_image):
+    print(f"id_ = {id_}")
     for i, n in enumerate(g_print.edges(data=True)):
+        print(f"n[-1]['id'] = {n[-1]['id']}")
         if n[-1]['id'] == id_:
             n[-1]['color'] = 'green'
         else:
@@ -31,8 +33,8 @@ def create_image_by_id(id_, g_print, id_image):
         # print(i, n)
 
     save_image(g_print, id_image)
-
-    id_ = id_[-2:]
+    id_tmp = id_[-3:]
+    id_ = id_tmp[id_tmp.index('S'):]
     for i, n in enumerate(g_print.nodes(data=True)):
         if n[-1]['id'] == id_:
             n[-1]['fillcolor'] = 'green'

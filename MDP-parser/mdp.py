@@ -45,7 +45,7 @@ class gramPrintListener(gramListener):
 
         etats[dep].transitions[act] = self.make_weights(ids, weights)
         etats[dep].have_decision = True
-    
+
     def enterTransnoact(self, ctx):
         ids = [str(x) for x in ctx.ID()]
         dep = ids.pop(0)
@@ -77,7 +77,7 @@ def main():
     chaine = []
     decisions = []
 
-    lexer = gramLexer(FileStream("ex.mdp"))
+    lexer = gramLexer(FileStream("simu-mdp.mdp"))
     stream = CommonTokenStream(lexer)
     parser = gramParser(stream)
     tree = parser.program()
@@ -102,8 +102,8 @@ def main():
         simulation_adv(etats, adv, G, n)
 
     print([k.nom for k in chaine])  # print all selected states
-    
-    
+
+
 def simulation_choice(etats,G_print, n=10):
 
     chaine.append(min(etats.values(), key=lambda obj: obj.id))

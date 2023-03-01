@@ -7,3 +7,4 @@ MDP-parser/*.ps;
 MDP-parser/tmp/*.png
 MDP-parser/.idea
 MDP-parser/mdp_verifications.py
+MDP-parser/mdps.zip
