@@ -24,14 +24,11 @@ def size_edges(states):
 
 
 def create_image_by_id(id_, g_print, id_image):
-    print(f"id_ = {id_}")
     for i, n in enumerate(g_print.edges(data=True)):
-        print(f"n[-1]['id'] = {n[-1]['id']}")
         if n[-1]['id'] == id_:
             n[-1]['color'] = 'green'
         else:
             n[-1]['color'] = 'black'
-        # print(i, n)
 
     save_image(g_print, id_image)
     letters = list(string.ascii_uppercase)
@@ -79,7 +76,6 @@ def print_graph(etats):
 
     # Define the transition probabilities
     P = dict()
-    # print(etats)
     for etat in states:
         if etats[etat].have_decision:
             P[etat] = dict()
@@ -87,7 +83,6 @@ def print_graph(etats):
                 P[etat][action] = list_to_dict(states, probs)
         else:
             P[etat] = list_to_dict(states, etats[etat].transitions['MC'])
-    # print(P)
 
     # Create the graph
     G = nx.MultiDiGraph()
