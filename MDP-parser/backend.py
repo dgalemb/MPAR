@@ -44,8 +44,16 @@ class gramPrintListener(gramListener):
         # print("Transition from " + dep + " with action "+ act + " and targets " + str(ids) + " with weights " + str(weights))
         # self.props['transact_type1'].append([dep, act, ids, weights])
 
-        etats[dep].transitions[act] = self.make_weights(ids, weights)
-        etats[dep].have_decision = True
+        try:
+
+            etats[dep].transitions[act] = self.make_weights(ids, weights)
+            etats[dep].have_decision = True
+
+        except KeyError:
+
+            sys.exit('Less states have been declared than those who have been used to define transitions after, making it impossible to proceed. Please correct the .mdp file and retry.')
+
+
 
     def enterTransnoact(self, ctx):
         ids = [str(x) for x in ctx.ID()]
@@ -61,11 +69,17 @@ class gramPrintListener(gramListener):
         array = np.zeros(len(etats))
 
         for arrival, weight in zip(arrivals, weights):
-            id = etats[arrival].id
-            array[id] = int(weight)
 
-        return array / array.sum()
+            try:
 
+                id = etats[arrival].id
+                array[id] = int(weight)
+
+            except KeyError:
+                sys.exit('Less states have been declared than those who have been used to define transitions after, making it impossible to proceed. Please correct the .mdp file and retry.')
+
+
+        return array/array.sum()
 
 def load_mdp(path_to_mdp):
     global chaine  # séquence d'états qui ont été faits
@@ -83,6 +97,8 @@ def load_mdp(path_to_mdp):
     printer = gramPrintListener()
     walker = ParseTreeWalker()
     p = walker.walk(printer, tree)
+
+    check_problems(etats)
 
     G = print_graph(etats)
     return etats, G
@@ -239,6 +255,35 @@ def choose_state(weights):
     choice = random.choices(actions, weights=weights, k=1)
     return choice[0]
 
+# Checks for the problems in the ex.mdp file
+def check_problems(etats):
+
+    for k in etats:
+
+        if etats[k].have_decision:
+
+            for listt in list(etats[k].transitions.values()):
+
+                if sum(listt) == 0:
+                   sys.exit(f'The state {k} has no exit states for at least one of its actions, making it impossible to proceed. Please correct the .mdp file and retry.')
+
+            if 'MC'in list(etats[k].transitions.keys()):
+                sys.exit(f'The state {k} has both deterministic and non-deterministic transitions defined to it, making it impossible to proceed. Please correct the .mdp file and retry.')
+
+
+        else:
+
+            try:
+
+                if sum(list(etats[k].transitions.values())[0]) == 0:
+
+                    sys.exit(f'The state {k} (with no actions) has no exit states, making it impossible to proceed. Please correct the .mdp file and retry.')
+
+
+            except (KeyError, IndexError):
+                sys.exit('More states have been declared than those who have been used to define transitions after, making it impossible to proceed. Please correct the .mdp file and retry.')
+
+    return
 
 # def define_adversaire(etats):
 #     adv = {}
@@ -252,4 +297,3 @@ def choose_state(weights):
 #     print(f"Etats choisis = {etat_choices}")
 #
 #     return adv
-
