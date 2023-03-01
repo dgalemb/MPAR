@@ -92,6 +92,7 @@ class MainWindow(window_name, base_class):
                 exist = True
                 # show init image
                 pixmap = QPixmap(init_image)
+                pixmap = pixmap.scaled(590, 560)
                 self.label_image_init.setPixmap(pixmap)
 
     def hide_options(self):
@@ -131,6 +132,7 @@ class MainWindow(window_name, base_class):
         if int(current_number) > 0:
             self.current_image = self.current_image.replace(current_number, str(int(current_number) - 1))
             pixmap = QPixmap(self.current_image)
+            pixmap = pixmap.scaled(590, 560)
             self.label_image_next.setPixmap(pixmap)
             self.image_name.setText(self.current_image[self.current_image.find('image_'):self.current_image.find('.')])
 
@@ -139,6 +141,7 @@ class MainWindow(window_name, base_class):
         if int(current_number) < 2 * self.n_transitions + 1:
             self.current_image = self.current_image.replace(current_number, str(int(current_number) + 1))
             pixmap = QPixmap(self.current_image)
+            pixmap = pixmap.scaled(590, 560)
             self.label_image_next.setPixmap(pixmap)
             self.image_name.setText(self.current_image[self.current_image.find('image_'):self.current_image.find('.')])
         # else:
@@ -189,6 +192,7 @@ class MainWindow(window_name, base_class):
                 image_created = True
                 self.current_image = os.path.dirname(os.path.abspath(__file__)) + r'\tmp\image_' + f'{image_number + 1}.png'
                 pixmap = QPixmap(self.current_image)
+                pixmap = pixmap.scaled(590, 560)
                 self.label_image_next.setPixmap(pixmap)
                 self.image_name.setText(f'image_{image_number+1}')
                 self.btn_each_action_next.setEnabled(True)
@@ -203,6 +207,7 @@ class MainWindow(window_name, base_class):
     def show_images_roullette(self):
         self.current_image = os.path.dirname(os.path.abspath(__file__)) + r'\tmp\image_0.png'
         pixmap = QPixmap(self.current_image)
+        pixmap = pixmap.scaled(590, 560)
         self.label_image_next.setPixmap(pixmap)
         self.btn_next_image.show()
         self.btn_previous_image.show()

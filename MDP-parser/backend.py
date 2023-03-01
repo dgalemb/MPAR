@@ -265,10 +265,12 @@ def check_problems(etats):
             for listt in list(etats[k].transitions.values()):
 
                 if sum(listt) == 0:
-                   sys.exit(f'The state {k} has no exit states for at least one of its actions, making it impossible to proceed. Please correct the .mdp file and retry.')
+                    print(f'The state {k} has no exit states for at least one of its actions, making it impossible to proceed. Please correct the .mdp file and retry.')
+                    sys.exit()
 
             if 'MC'in list(etats[k].transitions.keys()):
-                sys.exit(f'The state {k} has both deterministic and non-deterministic transitions defined to it, making it impossible to proceed. Please correct the .mdp file and retry.')
+                print(f'The state {k} has both deterministic and non-deterministic transitions defined to it, making it impossible to proceed. Please correct the .mdp file and retry.')
+                sys.exit()
 
 
         else:
@@ -276,12 +278,13 @@ def check_problems(etats):
             try:
 
                 if sum(list(etats[k].transitions.values())[0]) == 0:
-
-                    sys.exit(f'The state {k} (with no actions) has no exit states, making it impossible to proceed. Please correct the .mdp file and retry.')
+                    print(f'The state {k} (with no actions) has no exit states, making it impossible to proceed. Please correct the .mdp file and retry.')
+                    sys.exit()
 
 
             except (KeyError, IndexError):
-                sys.exit('More states have been declared than those who have been used to define transitions after, making it impossible to proceed. Please correct the .mdp file and retry.')
+                print('More states have been declared than those who have been used to define transitions after, making it impossible to proceed. Please correct the .mdp file and retry.')
+                sys.exit()
 
     return
 
