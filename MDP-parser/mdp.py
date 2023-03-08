@@ -244,5 +244,12 @@ def define_adversaire(etats):
     return adv
 
 
+def identifier_ensembles(etats):
+
+    accessibles = {}
+
+    for k in etats:
+        pass
+
 if __name__ == '__main__':
     main()
