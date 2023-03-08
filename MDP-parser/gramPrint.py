@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from networkx.drawing.nx_agraph import to_agraph
 import numpy as np
 import imageio
+import string
 
 
 def list_to_dict(nom_etats, liste):
@@ -23,24 +24,32 @@ def size_edges(states):
 
 
 def create_image_by_id(id_, g_print, id_image):
-    print(f"id_ = {id_}")
     for i, n in enumerate(g_print.edges(data=True)):
-        print(f"n[-1]['id'] = {n[-1]['id']}")
         if n[-1]['id'] == id_:
             n[-1]['color'] = 'green'
         else:
             n[-1]['color'] = 'black'
-        # print(i, n)
 
     save_image(g_print, id_image)
-    id_tmp = id_[-3:]
-    id_ = id_tmp[id_tmp.index('S'):]
-    for i, n in enumerate(g_print.nodes(data=True)):
-        if n[-1]['id'] == id_:
-            n[-1]['fillcolor'] = 'green'
-        else:
-            n[-1]['fillcolor'] = 'white'
-        # print(i, n)
+    letters = list(string.ascii_uppercase)
+    if len(id_) > 3 or id_[-1].isnumeric():
+        id_tmp = id_[-3:]
+        for l in letters:
+            if l in id_tmp:
+                id_ = id_tmp[id_tmp.index(l):]
+                for i, n in enumerate(g_print.nodes(data=True)):
+                    if n[-1]['id'] == id_:
+                        n[-1]['fillcolor'] = 'green'
+                    else:
+                        n[-1]['fillcolor'] = 'white'
+    else:
+        id_ = id_[-1]
+        for i, n in enumerate(g_print.nodes(data=True)):
+            if n[-1]['id'] == id_:
+                n[-1]['fillcolor'] = 'green'
+            else:
+                n[-1]['fillcolor'] = 'white'
+
 
     save_image(g_print, id_image + 1)
 
@@ -67,7 +76,6 @@ def print_graph(etats):
 
     # Define the transition probabilities
     P = dict()
-    # print(etats)
     for etat in states:
         if etats[etat].have_decision:
             P[etat] = dict()
@@ -75,7 +83,6 @@ def print_graph(etats):
                 P[etat][action] = list_to_dict(states, probs)
         else:
             P[etat] = list_to_dict(states, etats[etat].transitions['MC'])
-    # print(P)
 
     # Create the graph
     G = nx.MultiDiGraph()
