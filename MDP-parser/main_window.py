@@ -74,7 +74,7 @@ class MainWindow(window_name, base_class):
         self.btn_previous_image.hide()
 
     def clean_tmp(self):
-        directory = os.path.dirname(os.path.abspath(__file__)) + r'\tmp'
+        directory = os.path.dirname(os.path.abspath(__file__)) + r'/tmp'
         files_in_directory = os.listdir(directory)
 
         filtered_files = [file for file in files_in_directory if file.endswith(".png")]
@@ -86,7 +86,7 @@ class MainWindow(window_name, base_class):
 
     def add_init_image_to_screen(self):
         exist = False
-        init_image = os.path.dirname(os.path.abspath(__file__)) + r'\tmp\image_init.png'
+        init_image = os.path.dirname(os.path.abspath(__file__)) + r'/tmp/image_init.png'
         while not exist:
             if os.path.exists(init_image):
                 exist = True
@@ -148,7 +148,7 @@ class MainWindow(window_name, base_class):
         #     self.btn_next_image.hide()
 
     def decision_taken(self):
-        directory = os.path.dirname(os.path.abspath(__file__)) + r'\tmp'
+        directory = os.path.dirname(os.path.abspath(__file__)) + r'/tmp'
         files_in_directory = os.listdir(directory)
         filtered_files = [file for file in files_in_directory if file.endswith(".png")]
         actual_image_number = int((len(filtered_files) - 1))
@@ -161,7 +161,7 @@ class MainWindow(window_name, base_class):
         self.btn_each_action_next.show()
 
     def create_new_image(self):
-        directory = os.path.dirname(os.path.abspath(__file__)) + r'\tmp'
+        directory = os.path.dirname(os.path.abspath(__file__)) + r'/tmp'
         files_in_directory = os.listdir(directory)
         filtered_files = [file for file in files_in_directory if file.endswith(".png")]
         if len(filtered_files) < 2 * self.n_transitions + 3:
@@ -182,7 +182,7 @@ class MainWindow(window_name, base_class):
             self.btn_previous_image.show()
 
     def show_image_created(self, image_number):
-        directory = os.path.dirname(os.path.abspath(__file__)) + r'\tmp'
+        directory = os.path.dirname(os.path.abspath(__file__)) + r'/tmp'
         image_created = False
         self.btn_each_action_next.setEnabled(False)
         while not image_created:
@@ -190,7 +190,7 @@ class MainWindow(window_name, base_class):
             filtered_files = [file for file in files_in_directory if file.endswith(".png")]
             if 'image_' + str(image_number) + '.png' in filtered_files:
                 image_created = True
-                self.current_image = os.path.dirname(os.path.abspath(__file__)) + r'\tmp\image_' + f'{image_number + 1}.png'
+                self.current_image = os.path.dirname(os.path.abspath(__file__)) + r'/tmp/image_' + f'{image_number + 1}.png'
                 pixmap = QPixmap(self.current_image)
                 pixmap = pixmap.scaled(590, 560)
                 self.label_image_next.setPixmap(pixmap)
@@ -205,7 +205,7 @@ class MainWindow(window_name, base_class):
         self.show_image_created(0)
 
     def show_images_roullette(self):
-        self.current_image = os.path.dirname(os.path.abspath(__file__)) + r'\tmp\image_0.png'
+        self.current_image = os.path.dirname(os.path.abspath(__file__)) + r'/tmp/image_0.png'
         pixmap = QPixmap(self.current_image)
         pixmap = pixmap.scaled(590, 560)
         self.label_image_next.setPixmap(pixmap)
@@ -218,7 +218,7 @@ class MainWindow(window_name, base_class):
         simulation_rand(self.etats, self.G, self.n_transitions)
 
         # verify creation of images
-        directory = os.path.dirname(os.path.abspath(__file__)) + r'\tmp'
+        directory = os.path.dirname(os.path.abspath(__file__)) + r'/tmp'
 
         images_created = False
 
@@ -257,7 +257,7 @@ class MainWindow(window_name, base_class):
 
             simulation_adv(self.etats, self.adv, self.G, self.n_transitions)
             # verify creation of images
-            directory = os.path.dirname(os.path.abspath(__file__)) + r'\tmp'
+            directory = os.path.dirname(os.path.abspath(__file__)) + r'/tmp'
 
             images_created = False
 
