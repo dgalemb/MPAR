@@ -69,8 +69,9 @@ class gramPrintListener(gramListener):
             etats[dep].transitions[act] = self.make_weights(ids, weights)
             etats[dep].have_decision = True
 
+
         except KeyError:
-            print('2Less states have been declared than those who have been used to define transitions after, making it impossible to proceed. Please correct the .mdp file and retry.')
+            print('Less states have been declared than those who have been used to define transitions after, making it impossible to proceed. Please correct the .mdp file and retry.')
             sys.exit()
 
 
@@ -99,7 +100,7 @@ class gramPrintListener(gramListener):
                 array[id] = int(weight)
 
             except KeyError:
-                print('1Less states have been declared than those who have been used to define transitions after, making it impossible to proceed. Please correct the .mdp file and retry.')
+                print('Less states have been declared than those who have been used to define transitions after, making it impossible to proceed. Please correct the .mdp file and retry.')
                 sys.exit()
 
         return array/array.sum()
@@ -112,7 +113,7 @@ def main():
     etats = {}
     
 
-    lexer = gramLexer(FileStream("/Users/dgalembeck/Documents/Coding/Cours/MPAR/MDP-parser/mdps/RL.mdp"))
+    lexer = gramLexer(FileStream("/Users/dgalembeck/Documents/Coding/Cours/MPAR/MDP-parser/mdps/pctl2.mdp"))
     stream = CommonTokenStream(lexer)
     parser = gramParser(stream)
     tree = parser.program()
@@ -150,8 +151,8 @@ def main():
 
     elif choice1 == 2:
 
-        print('Would you like to do SMC Quantitative or SMC Qualitatif or PCTL for CMs ? Type 1 or 2 or 3 ... respectively.')
-        choice3 = int(input('Your choice (1 or 2 or 3...):'))
+        print('Would you like to do SMC Quantitative or SMC Qualitatif or PCTL for CMs or PCTL for MDPs ...? Type 1 or 2 or 3 or 4 ... respectively.')
+        choice3 = int(input('Your choice (1 or 2 or 3 or 4...):'))
 
         if choice3 == 1:
             SMC_quantitatif(etats, G)
@@ -161,14 +162,10 @@ def main():
 
         elif choice3 == 3:
             PCTL_CM(etats)
-            
 
-
-
-
-
-
-
+        elif choice3 == 4:
+            PCTL_MDP(etats)
+    
 
 def simulation_choice(etats, G_print, chaine, printt, n=10):
 
@@ -310,7 +307,7 @@ def define_adversaire(etats):
         print(f'For the state {etat.nom} the choices are: {list(etat.transitions.keys())} with the respective probabilities {list(etat.transitions.values())}')
         adv[etat.nom] = str(input('Your choice for your adversiare is: '))
 
-    print(f"Etats choisis = {etat_choices}")
+    #print(f"Etats choisis = {etat_choices}")
 
     return adv
 
@@ -417,6 +414,8 @@ def PCTL_CM(etats):
 
     goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
 
+    N = int(input('''Would you like to test it for a certain number N of simulations? Type N or 0 if not.'''))
+
     S1 = []
     S1 = get_predecs(etats, goal_state, S1) + [goal_state]
 
@@ -428,14 +427,17 @@ def PCTL_CM(etats):
         if goal_state not in S:
             S0.append(k)
 
-    print(S0)
+    S2 = S1 + S0
+    S3 = [k for k in etats if k not in S2]
+
+    print(S0, S1, S3)
 
     A = []
     b = np.zeros(len(etats))
 
     for k in etats:
         sum = 0
-        if etats[k].nom not in S1 or etats[k].nom not in S0:
+        if etats[k].nom not in S2:
             A.append(etats[k].transitions['MC'])
             for i, transition in enumerate(etats[k].transitions['MC']):
                 if i in [etats[k].id for k in S1]:
@@ -443,18 +445,28 @@ def PCTL_CM(etats):
                 
             b[etats[k].id] = sum
 
-    A = np.delete(A, [etats[s].id for s in S1], 1)
-    b = np.delete(b, [etats[s].id for s in S1], 0)
 
-    #for k in etats.values(): print(k)
+    A = np.delete(A, [etats[s].id for s in S2], 1)
+    b = np.delete(b, [etats[s].id for s in S2], 0)
 
-    #print(A, b)
-    #x = np.linalg.solve(A, b)
+    if N == 0:
+
+        x = np.dot(np.linalg.inv(np.identity(len(A)) - A), b) 
+        for k, i in zip(S3, range(len(S3))):
+            print(f'The probability for the state {k} is {x[i]}')
     
-    #print(x)            
+    else:
+        y = np.zeros(len(A))
+        for k in range(N):
+            print(y)
+            y = np.dot(A, y) + b
+            print(y)          
+
+        for k, i in zip(S3, range(len(S3))):
+            print(f'The probability for the state {k} after at most {N} transitions is {y[i]}')
 
 
-
+    return
 
 def get_predecs(etats, state, S0):
 
@@ -464,7 +476,7 @@ def get_predecs(etats, state, S0):
     
     else:
         for s in etats[state].predecs:
-            if s != state:
+            if s != state and s not in S0:
                 S0.append(s)
                 get_predecs(etats, s, S0)
 
@@ -482,13 +494,53 @@ def get_succs(etats, state, S0):
     
     else:
         for s in etats[state].succs:
-            if s != state:
+            if s != state and s not in S0:
                 S0.append(s)
                 get_succs(etats, s, S0)
 
 
     return S0
 
+def PCTL_MDP(etats):
+
+    adv = define_adversaire(etats)
+    etatscop = etats.copy()
+
+    for k in adv:
+        new_transitions = {'MC':etats[k].transitions[adv[k]]}
+        etatscop[k].transitions = new_transitions
+
+    #for k in etatscop.values(): print(k)
+
+    etatscop = inittMDP(etatscop)
+
+    for k in etatscop.values(): print(k)
+
+    PCTL_CM(etatscop)
+
+def inittMDP(etats):
+
+    for dep in etats.values():
+
+        if dep.have_decision:
+
+            for i, k in enumerate(dep.transitions['MC']):
+                if k != 0.:
+                    etats[dep.nom].succs.append(find_by_id(etats, i))
+                if k == 1.:
+                    etats[find_by_id(etats, i)].predecs.append(dep.nom)
+               
+                print(dep.succs, dep.predecs)
+
+
+
+    return etats
+
+def find_by_id(etats, id):
+
+    for j in etats.values():
+        if j.id == id:
+            return j.nom
 
 if __name__ == '__main__':
     main()
