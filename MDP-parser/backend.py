@@ -98,9 +98,7 @@ def load_mdp(path_to_mdp):
     printer = gramPrintListener()
     walker = ParseTreeWalker()
     p = walker.walk(printer, tree)
-    print("Hola")
     check_problems(etats)
-    print("Hola2")
 
     G = print_graph(etats)
     return etats, G
