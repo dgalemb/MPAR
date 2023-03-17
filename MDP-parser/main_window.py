@@ -38,10 +38,17 @@ class MainWindow(window_name, base_class):
 
         self.etats_with_decision = None
         self.adv = {}
+        self.image_in_screen_size = self.label_image_init.size()
+        # print(f"self.image_in_screen_size: {self.image_in_screen_size}")
 
     def init_gui(self):
 
         self.actionOpen_File.triggered.connect(self.showDialog)
+
+        # Init questions
+        self.btn_simulate.clicked.connect(self.simulate_options)
+        self.btn_modelchecking.clicked.connect(self.modelchecking_options)
+        self.hide_init_options()
 
         self.btn_folder.clicked.connect(self.showDialog)
         self.btn_each_action.clicked.connect(self.each_action_print)
@@ -57,7 +64,7 @@ class MainWindow(window_name, base_class):
         self.btn_each_action_next.hide()
         self.btn_each_action_next.clicked.connect(self.create_new_image)
 
-        # adv
+        # adversaire 
         self.label_create_adv.hide()
         self.label_state_options.hide()
         self.label_etat.hide()
@@ -67,13 +74,17 @@ class MainWindow(window_name, base_class):
         self.label_prob.hide()
         self.label_action_probabilities.hide()
 
+        # model checking 
+        self.box_model_checking.addItems(["SMC Quantitative", "SMC Qualitatif", "PCTL for CMs", "PCTL for MDPs"])
+        self.box_model_checking.hide()
 
-        self.hide_options()
+        self.hide_simulate_options()
         self.clean_tmp()
         self.btn_next_image.hide()
         self.btn_previous_image.hide()
+        
 
-    def clean_tmp(self):
+    def clean_tmp(self):  # clean the tmp folder.
         directory = os.path.dirname(os.path.abspath(__file__)) + r'/tmp'
         files_in_directory = os.listdir(directory)
 
@@ -94,8 +105,27 @@ class MainWindow(window_name, base_class):
                 pixmap = QPixmap(init_image)
                 pixmap = pixmap.scaled(590, 560)
                 self.label_image_init.setPixmap(pixmap)
+    
+    def simulate_options(self):
+        self.show_simulate_options()
 
-    def hide_options(self):
+    def modelchecking_options(self):
+        # TODO: Add labels and buttons in qtdesigner
+        # TODO: show all the options of model-checking in interface after the button is pressed.
+        pass
+
+    def show_init_options(self):
+        self.label_options.show()
+        self.btn_modelchecking.show()
+        self.btn_simulate.show()
+    
+    def hide_init_options(self):
+        self.label_options.hide()
+        self.btn_modelchecking.hide()
+        self.btn_simulate.hide()
+    
+    def hide_simulate_options(self):
+        # TO DO: change label_options text
         self.label_options.hide()
         self.btn_each_action.hide()
         self.btn_random_simulation.hide()
@@ -103,7 +133,9 @@ class MainWindow(window_name, base_class):
         self.label_transitions.hide()
         self.number_transitions.hide()
 
-    def show_options(self):
+    def show_simulate_options(self):
+        self.hide_init_options()
+        self.label_options.setText("What would you like to simulate?")
         self.label_options.show()
         self.btn_each_action.show()
         self.btn_random_simulation.show()
@@ -119,13 +151,14 @@ class MainWindow(window_name, base_class):
         # The signal with the path is emitted
         self.file_path_stl_signal.emit(fname[0])
         if fname[0]:
-            self.etats, self. G = load_mdp(fname[0])
+            self.etats, self.G = load_mdp(fname[0])
             self.add_init_image_to_screen()
-            self.show_options()
+            self.show_init_options()
+            # self.show_simulate_options()
 
     def option_selected(self):
         self.n_transitions = self.number_transitions.value()
-        self.hide_options()
+        self.hide_simulate_options()
 
     def show_previous_image(self):
         current_number = self.current_image[self.current_image.find('image_')+6:self.current_image.find('.')]
@@ -292,5 +325,5 @@ if __name__ == '__main__':
     # windows instances
     main_window = MainWindow()
 
-    main_window.show()
+    main_window.showMaximized()
     app.exec()
