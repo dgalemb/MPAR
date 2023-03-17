@@ -75,8 +75,10 @@ class MainWindow(window_name, base_class):
         self.label_action_probabilities.hide()
 
         # model checking 
-        self.box_model_checking.addItems(["SMC Quantitative", "SMC Qualitatif", "PCTL for CMs", "PCTL for MDPs"])
-        self.box_model_checking.hide()
+        # TODO: Add more items
+        self.box_modelchecking.addItems(["SMC Quantitative", "SMC Qualitatif", "PCTL for CMs", "PCTL for MDPs"])
+        self.btn_accept_modelchecking.clicked.connect(self.model_checking_selected)
+        self.hide_modelchecking_options()
 
         self.hide_simulate_options()
         self.clean_tmp()
@@ -110,9 +112,19 @@ class MainWindow(window_name, base_class):
         self.show_simulate_options()
 
     def modelchecking_options(self):
-        # TODO: Add labels and buttons in qtdesigner
-        # TODO: show all the options of model-checking in interface after the button is pressed.
-        pass
+        self.show_modelchecking_options()
+
+    def show_modelchecking_options(self):
+        self.hide_init_options()
+        self.label_options.setText("Model Checking options")
+        self.label_options.show()
+        self.box_modelchecking.show()
+        self.btn_accept_modelchecking.show()
+    
+    def hide_modelchecking_options(self):
+        self.label_options.hide()
+        self.box_modelchecking.hide()
+        self.btn_accept_modelchecking.hide()
 
     def show_init_options(self):
         self.label_options.show()
@@ -142,6 +154,50 @@ class MainWindow(window_name, base_class):
         self.btn_pos_opponent.show()
         self.label_transitions.show()
         self.number_transitions.show()
+
+    def model_checking_selected(self):
+        # TODO: add functions from mdp.py to backend.py
+        option_selected = self.box_modelchecking.currentText()
+        if option_selected == "SMC Quantitative":
+            self.smc_quantitative_option()
+        elif option_selected == "SMC Qualitatif":
+            self.smc_qualitatif_option()
+        elif option_selected == "PCTL for CMs":
+            self.pctl_for_cms()
+        elif option_selected == "PCTL for MDPs":
+            self.pctl_for_mdps()
+
+    def smc_quantitative_option(self):
+        # TODO: Add function to backend
+        # TODO: Adapt function for interface controller
+        # TODO: create labels and buttons of this function
+        # TODO: create a function to show labels and buttons
+        # TODO: create a function to hide labels and buttons
+        pass
+
+    def smc_qualitatif_option(self):
+        # TODO: Add function to backend
+        # TODO: Adapt function for interface controller
+        # TODO: create labels and buttons of this function
+        # TODO: create a function to show labels and buttons
+        # TODO: create a function to hide labels and buttons
+        pass
+
+    def pctl_for_cms(self):
+        # TODO: Add function to backend
+        # TODO: Adapt function for interface controller
+        # TODO: create labels and buttons of this function
+        # TODO: create a function to show labels and buttons
+        # TODO: create a function to hide labels and buttons
+        pass
+
+    def pctl_for_mdps(self):
+        # TODO: Add function to backend
+        # TODO: Adapt function for interface controller
+        # TODO: create labels and buttons of this function
+        # TODO: create a function to show labels and buttons
+        # TODO: create a function to hide labels and buttons
+        pass
 
     def showDialog(self):
         directory = Path("")
