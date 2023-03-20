@@ -325,12 +325,12 @@ def SMC_quantitatif(etats, G, goal_state, turns, epsilon, delta):
 
 def SMC_qualitatif(etats, G, goal_state, turns, epsilon, alpha, beta, theta):
 
-    goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
-    turns = int(input('''Please type in how many (at most) transitions you'd like to access such state. Type 0 if that's not important.'''))    
-    epsilon = float(input('''What's the desired precision (\epsilon)? It has to be a value in the [0,1] interval.'''))
-    alpha = float(input('''What's the desired value for alpha?'''))
-    beta = float(input('''What's the desired value for beta?'''))
-    theta = float(input('''What's the theta value you'd like to compare to?'''))
+    # goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
+    # turns = int(input('''Please type in how many (at most) transitions you'd like to access such state. Type 0 if that's not important.'''))    
+    # epsilon = float(input('''What's the desired precision (\epsilon)? It has to be a value in the [0,1] interval.'''))
+    # alpha = float(input('''What's the desired value for alpha?'''))
+    # beta = float(input('''What's the desired value for beta?'''))
+    # theta = float(input('''What's the theta value you'd like to compare to?'''))
 
     gamma1 = theta - epsilon
     gamma0 = theta + epsilon
@@ -349,7 +349,7 @@ def SMC_qualitatif(etats, G, goal_state, turns, epsilon, alpha, beta, theta):
     while(not end):
 
         chaine = []
-        simulation_rand(etats, G, chaine, False, turns)
+        simulation_rand_mdp(etats, G, chaine, False, turns)
         if goal_state in [k.nom for k in chaine]:
             Fm += Vadd
         else:
@@ -365,7 +365,7 @@ def SMC_qualitatif(etats, G, goal_state, turns, epsilon, alpha, beta, theta):
             print(result)
             end = True
 
-    return result
+    return result, ""
 
 def PCTL_CM(etats):
 

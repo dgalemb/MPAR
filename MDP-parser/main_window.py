@@ -185,7 +185,7 @@ class MainWindow(window_name, base_class):
         # TODO: create a function to show labels and buttons
         # TODO: create a function to hide labels and buttons
         self.hide_modelchecking_options()
-        self.label_options.setText("SMC Quantitative")
+        self.label_options.setText("SMC Quantitatif")
         self.label_options.show()
         self.smc_quant_states.clear()
         self.smc_quant_states.addItems(self.etats)
@@ -210,10 +210,28 @@ class MainWindow(window_name, base_class):
         # TODO: create labels and buttons of this function
         # TODO: create a function to show labels and buttons
         # TODO: create a function to hide labels and buttons
-        pass
+        self.hide_modelchecking_options()
+        self.label_options.setText("SMC Qualitatif")
+        self.label_options.show()
+        self.smc_qual_states.clear()
+        self.smc_qual_states.addItems(self.etats)
+        self.smc_qualitatif_widget.move(740, 210)
+        self.smc_qualitatif_widget.show()
 
     def smc_qualitatif_calculate(self):
-        pass
+        goal_state = self.smc_qual_states.currentText()
+        turns = self.smc_qual_n_transitions.value()
+        epsilon = self.smc_qual_epsilon.value()
+        alpha = self.smc_qual_alpha.value()
+        beta = self.smc_qual_beta.value()
+        theta = self.smc_qual_theta.value()
+        result_smc_qual1, result_smc_qual2  = SMC_qualitatif(self.etats, self.G, goal_state, turns, epsilon, alpha, beta, theta)
+
+        self.smc_qualitatif_widget.hide()
+        self.modelchecking_result.move(780, 210)
+        self.modelchecking_answer1.setText(result_smc_qual1)
+        self.modelchecking_answer2.setText(result_smc_qual2)
+        self.modelchecking_result.show()
 
     def pctl_for_cms(self):
         # TODO: Adapt function for interface controller
