@@ -295,12 +295,12 @@ def check_problems(etats):
 
     return
 
-def SMC_quantitatif(etats, G):
+def SMC_quantitatif(etats, G, goal_state, turns, epsilon, delta):
     
-    goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
-    turns = int(input('''Please type in how many (at most) transitions you'd like to access such state.'''))    
-    epsilon = float(input('''What's the desired precision (\epsilon)? It has to be a value in the [0,1] interval.'''))
-    delta = float(input('''What's the desired error rate (\delta)? It has to be a value in the [0,1] interval.'''))
+    # goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
+    # turns = int(input('''Please type in how many (at most) transitions you'd like to access such state.'''))    
+    # epsilon = float(input('''What's the desired precision (\epsilon)? It has to be a value in the [0,1] interval.'''))
+    # delta = float(input('''What's the desired error rate (\delta)? It has to be a value in the [0,1] interval.'''))
 
     N = int(np.ceil((np.log(2) - np.log(delta))/((2*epsilon)**2)) + 1)
     print(f'{N} simulations will be done, assuring the given \epsilon and \delta.')
@@ -315,16 +315,16 @@ def SMC_quantitatif(etats, G):
 
     gamma = success / N
 
-    print(f'The given model M respects the property given with probability {gamma}, respecting epsilon ({epsilon}) and delta ({delta})')
+    result = f'The given model M respects the property given with probability {gamma}, respecting epsilon ({epsilon}) and delta ({delta})'
+    print(result)
 
-    return
+    return result
 
-def SMC_qualitatif(etats, G):
+def SMC_qualitatif(etats, G, goal_state, turns, epsilon, alpha, beta, theta):
 
     goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
     turns = int(input('''Please type in how many (at most) transitions you'd like to access such state. Type 0 if that's not important.'''))    
     epsilon = float(input('''What's the desired precision (\epsilon)? It has to be a value in the [0,1] interval.'''))
-    delta = float(input('''What's the desired error rate (\delta)? It has to be a value in the [0,1] interval.'''))
     alpha = float(input('''What's the desired value for alpha?'''))
     beta = float(input('''What's the desired value for beta?'''))
     theta = float(input('''What's the theta value you'd like to compare to?'''))
@@ -342,6 +342,7 @@ def SMC_qualitatif(etats, G):
     Fb = np.log(beta / (1 - alpha)) 
 
     end = False
+    result = ""
     while(not end):
 
         chaine = []
@@ -352,14 +353,16 @@ def SMC_qualitatif(etats, G):
             Fm += Vrem
 
         if Fm >= Fa:
-            print(f'Hypothesis H1 accepted: Gamma <= Gamma1 = Gamma - Epsilon ({gamma1})!')
+            result = f'Hypothesis H1 accepted: Gamma <= Gamma1 = Gamma - Epsilon ({gamma1})!'
+            print(result)
             end = True
             
         if Fm <= Fb:
-            print(f'hypothesis H0 accepted: Gamma >= Gamma0 = Gamma + Epsilon ({gamma0})!')
+            result = f'hypothesis H0 accepted: Gamma >= Gamma0 = Gamma + Epsilon ({gamma0})!'
+            print(result)
             end = True
 
-    return
+    return result
 
 def PCTL_CM(etats):
 

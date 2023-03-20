@@ -7,7 +7,7 @@ from PyQt5.QtCore import pyqtSignal
 
 from pathlib import Path
 
-from backend import Etat, gramPrintListener, load_mdp, simulation_rand, simulation_choice, simulation_choice_normal, simulation_choice_decision, simulation_adv
+from backend import Etat, gramPrintListener, load_mdp, simulation_rand, simulation_choice, simulation_choice_normal, simulation_choice_decision, simulation_adv, SMC_quantitatif, SMC_qualitatif, PCTL_CM, PCTL_MDP
 
 
 window_name, base_class = uic.loadUiType("main-window.ui")
@@ -79,7 +79,16 @@ class MainWindow(window_name, base_class):
         self.box_modelchecking.addItems(["SMC Quantitative", "SMC Qualitatif", "PCTL for CMs", "PCTL for MDPs"])
         self.btn_accept_modelchecking.clicked.connect(self.model_checking_selected)
         self.hide_modelchecking_options()
+        self.btn_smc_quant.clicked.connect(self.)
+        self.btn_smc_qual.connect(self.)
+        
+        # model checking : smc quantitative
+        self.smc_quantitative_widget.hide()
 
+        # model checking : smc qualitatif
+        self.smc_qualitatif_widget.hide()
+
+        # others
         self.hide_simulate_options()
         self.clean_tmp()
         self.btn_next_image.hide()
@@ -168,15 +177,21 @@ class MainWindow(window_name, base_class):
             self.pctl_for_mdps()
 
     def smc_quantitative_option(self):
-        # TODO: Add function to backend
+        # TODO: Add layout into widget. Add double layout.
         # TODO: Adapt function for interface controller
         # TODO: create labels and buttons of this function
+        # For add unicode characters into qt designer: https://stackoverflow.com/questions/52592663/unicode-characters-in-qt-designer-for-python
         # TODO: create a function to show labels and buttons
         # TODO: create a function to hide labels and buttons
-        pass
+        self.hide_modelchecking_options()
+        self.label_options.setText("SMC Quantitative")
+        self.label_options.show()
+        self.smc_quant_states.clear()
+        self.smc_quant_states.addItems(self.etats)
+        self.smc_quantitative_widget.move(740, 210)
+        self.smc_quantitative_widget.show()
 
     def smc_qualitatif_option(self):
-        # TODO: Add function to backend
         # TODO: Adapt function for interface controller
         # TODO: create labels and buttons of this function
         # TODO: create a function to show labels and buttons
@@ -184,7 +199,6 @@ class MainWindow(window_name, base_class):
         pass
 
     def pctl_for_cms(self):
-        # TODO: Add function to backend
         # TODO: Adapt function for interface controller
         # TODO: create labels and buttons of this function
         # TODO: create a function to show labels and buttons
@@ -192,7 +206,6 @@ class MainWindow(window_name, base_class):
         pass
 
     def pctl_for_mdps(self):
-        # TODO: Add function to backend
         # TODO: Adapt function for interface controller
         # TODO: create labels and buttons of this function
         # TODO: create a function to show labels and buttons
