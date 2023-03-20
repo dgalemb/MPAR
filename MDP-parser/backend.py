@@ -9,6 +9,8 @@ import numpy as np
 from numpy import linalg
 import random
 
+from mdp import simulation_rand as simulation_rand_mdp
+
 
 class Etat():
 
@@ -303,22 +305,23 @@ def SMC_quantitatif(etats, G, goal_state, turns, epsilon, delta):
     # delta = float(input('''What's the desired error rate (\delta)? It has to be a value in the [0,1] interval.'''))
 
     N = int(np.ceil((np.log(2) - np.log(delta))/((2*epsilon)**2)) + 1)
-    print(f'{N} simulations will be done, assuring the given \epsilon and \delta.')
+    result1 = f'{N} simulations will be done, assuring the given epsilon and delta.'
+    print(result1)
             
     success = 0
 
     for k in range(N):
         chaine = []
-        simulation_rand(etats, G, chaine, False, turns)
+        simulation_rand_mdp(etats, G, chaine, False, turns)
         if goal_state in [k.nom for k in chaine]:
             success += 1
 
     gamma = success / N
 
-    result = f'The given model M respects the property given with probability {gamma}, respecting epsilon ({epsilon}) and delta ({delta})'
-    print(result)
+    result2 = f'The given model M respects the property given with probability {gamma}, respecting epsilon ({epsilon}) and delta ({delta})'
+    print(result2)
 
-    return result
+    return result1, result2
 
 def SMC_qualitatif(etats, G, goal_state, turns, epsilon, alpha, beta, theta):
 

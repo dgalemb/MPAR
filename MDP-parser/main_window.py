@@ -79,13 +79,14 @@ class MainWindow(window_name, base_class):
         self.box_modelchecking.addItems(["SMC Quantitative", "SMC Qualitatif", "PCTL for CMs", "PCTL for MDPs"])
         self.btn_accept_modelchecking.clicked.connect(self.model_checking_selected)
         self.hide_modelchecking_options()
-        self.btn_smc_quant.clicked.connect(self.)
-        self.btn_smc_qual.connect(self.)
+        self.modelchecking_result.hide()
         
         # model checking : smc quantitative
+        self.btn_smc_quant.clicked.connect(self.smc_quantitatif_calculate)
         self.smc_quantitative_widget.hide()
 
         # model checking : smc qualitatif
+        self.btn_smc_qual.clicked.connect(self.smc_qualitatif_calculate)
         self.smc_qualitatif_widget.hide()
 
         # others
@@ -191,11 +192,27 @@ class MainWindow(window_name, base_class):
         self.smc_quantitative_widget.move(740, 210)
         self.smc_quantitative_widget.show()
 
+    def smc_quantitatif_calculate(self):
+        goal_state = self.smc_quant_states.currentText()
+        turns = self.smc_quant_n_transitions.value()
+        epsilon = self.smc_quant_epsilon.value()
+        delta = self.smc_quant_delta.value()
+        result_smc_quant1, result_smc_quant2  = SMC_quantitatif(self.etats, self.G, goal_state, turns, epsilon, delta)
+
+        self.smc_quantitative_widget.hide()
+        self.modelchecking_result.move(780, 210)
+        self.modelchecking_answer1.setText(result_smc_quant1)
+        self.modelchecking_answer2.setText(result_smc_quant2)
+        self.modelchecking_result.show()
+
     def smc_qualitatif_option(self):
         # TODO: Adapt function for interface controller
         # TODO: create labels and buttons of this function
         # TODO: create a function to show labels and buttons
         # TODO: create a function to hide labels and buttons
+        pass
+
+    def smc_qualitatif_calculate(self):
         pass
 
     def pctl_for_cms(self):
