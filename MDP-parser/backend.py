@@ -305,7 +305,7 @@ def SMC_quantitatif(etats, G, goal_state, turns, epsilon, delta):
     # delta = float(input('''What's the desired error rate (\delta)? It has to be a value in the [0,1] interval.'''))
 
     N = int(np.ceil((np.log(2) - np.log(delta))/((2*epsilon)**2)) + 1)
-    result1 = f'{N} simulations will be done, assuring the given epsilon and delta.'
+    result1 = f'{N} simulations have been made, assuring the given epsilon and delta.'
     print(result1)
             
     success = 0
