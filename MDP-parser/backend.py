@@ -318,7 +318,7 @@ def SMC_quantitatif(etats, G, goal_state, turns, epsilon, delta):
 
     gamma = success / N
 
-    result2 = f'The given model M respects the property given with probability {gamma}, respecting epsilon ({epsilon}) and delta ({delta})'
+    result2 = f'The given model M respects the property given with probability {round(gamma, 4)}, respecting epsilon ({round(epsilon, 4)}) and delta ({round(delta, 4)})'
     print(result2)
 
     return result1, result2
@@ -356,22 +356,22 @@ def SMC_qualitatif(etats, G, goal_state, turns, epsilon, alpha, beta, theta):
             Fm += Vrem
 
         if Fm >= Fa:
-            result = f'Hypothesis H1 accepted: Gamma <= Gamma1 = Gamma - Epsilon ({gamma1})!'
+            result = f'Hypothesis H1 accepted: Gamma <= Gamma1 = Gamma - Epsilon ({round(gamma1, 4)})!'
             print(result)
             end = True
             
         if Fm <= Fb:
-            result = f'hypothesis H0 accepted: Gamma >= Gamma0 = Gamma + Epsilon ({gamma0})!'
+            result = f'hypothesis H0 accepted: Gamma >= Gamma0 = Gamma + Epsilon ({round(gamma0, 4)})!'
             print(result)
             end = True
 
     return result, ""
 
-def PCTL_CM(etats):
+def PCTL_CM(etats, goal_state, N):
 
-    goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
+    # goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
 
-    N = int(input('''Would you like to test it for a certain number N of simulations? Type N or 0 if not.'''))
+    # N = int(input('''Would you like to test it for a certain number N of simulations? Type N or 0 if not.'''))
 
     S1 = []
     S1 = get_predecs(etats, goal_state, S1) + [goal_state]
@@ -389,6 +389,7 @@ def PCTL_CM(etats):
 
     print(S0, S1, S3)
 
+    result0 = [S0, S1, S3]
     A = []
     b = np.zeros(len(etats))
 
@@ -406,24 +407,28 @@ def PCTL_CM(etats):
     A = np.delete(A, [etats[s].id for s in S2], 1)
     b = np.delete(b, [etats[s].id for s in S2], 0)
 
+    result = ""
+
     if N == 0:
 
         x = np.dot(np.linalg.inv(np.identity(len(A)) - A), b) 
         for k, i in zip(S3, range(len(S3))):
-            print(f'The probability for the state {k} is {x[i]}')
+            result = f'The probability for the state {k} is {round(x[i], 4)}'
+            print(result)
     
     else:
         y = np.zeros(len(A))
         for k in range(N):
-            print(y)
+            # print(y)
             y = np.dot(A, y) + b
-            print(y)          
+            # print(y)          
 
         for k, i in zip(S3, range(len(S3))):
-            print(f'The probability for the state {k} after at most {N} transitions is {y[i]}')
+            result = f'The probability for the state {k} after at most {N} transitions is {round(y[i], 4)}'
+            print(result)
 
 
-    return
+    return result0, result
 
 def get_predecs(etats, state, S0):
 

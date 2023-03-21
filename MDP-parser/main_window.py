@@ -76,7 +76,7 @@ class MainWindow(window_name, base_class):
 
         # model checking 
         # TODO: Add more items
-        self.box_modelchecking.addItems(["SMC Quantitative", "SMC Qualitatif", "PCTL for CMs", "PCTL for MDPs"])
+        self.box_modelchecking.addItems(["SMC Quantitatif", "SMC Qualitatif", "PCTL for CMs", "PCTL for MDPs"])
         self.btn_accept_modelchecking.clicked.connect(self.model_checking_selected)
         self.hide_modelchecking_options()
         self.modelchecking_result.hide()
@@ -88,6 +88,10 @@ class MainWindow(window_name, base_class):
         # model checking : smc qualitatif
         self.btn_smc_qual.clicked.connect(self.smc_qualitatif_calculate)
         self.smc_qualitatif_widget.hide()
+
+        # model checking : pctl cm
+        self.btn_pctl_cm.clicked.connect(self.pctl_cm_calculate)
+        self.pctl_cm_widget.hide()
 
         # others
         self.hide_simulate_options()
@@ -238,7 +242,30 @@ class MainWindow(window_name, base_class):
         # TODO: create labels and buttons of this function
         # TODO: create a function to show labels and buttons
         # TODO: create a function to hide labels and buttons
+        self.hide_modelchecking_options()
+        self.label_options.setText("PCTL for CMs")
+        self.label_options.show()
+        self.pctl_cm_states.clear()
+        # TODO: delete state S0 pop(0)
+        states_for_pctl_cm = list(self.etats.keys())
+        states_for_pctl_cm.pop(0)
+        print(f'states_for_pctl_cm: {states_for_pctl_cm}')
+        self.pctl_cm_states.addItems(states_for_pctl_cm)
+        self.pctl_cm_widget.move(740, 210)
+        self.pctl_cm_widget.show()
         pass
+
+    def pctl_cm_calculate(self):
+        goal_state = self.pctl_cm_states.currentText()
+        N = self.pctl_cm_n_transitions.value()
+        result_pctl_cm1, result_pctl_cm2  = PCTL_CM(self.etats, goal_state, N)
+
+        self.pctl_cm_widget.hide()
+        self.modelchecking_result.move(780, 210)
+        result1 = f'S0: {result_pctl_cm1[0]} S1: {result_pctl_cm1[1]} S2: {result_pctl_cm1[2]}'
+        self.modelchecking_answer1.setText(result1)
+        self.modelchecking_answer2.setText(result_pctl_cm2)
+        self.modelchecking_result.show()
 
     def pctl_for_mdps(self):
         # TODO: Adapt function for interface controller
