@@ -7,7 +7,7 @@ from PyQt5.QtCore import pyqtSignal
 
 from pathlib import Path
 
-from backend import Etat, gramPrintListener, load_mdp, simulation_rand, simulation_choice, simulation_choice_normal, simulation_choice_decision, simulation_adv, SMC_quantitatif, SMC_qualitatif, PCTL_CM, PCTL_MDP
+from backend import Etat, gramPrintListener, load_mdp, simulation_rand, simulation_choice, simulation_choice_normal, simulation_choice_decision, simulation_adv, SMC_quantitatif, SMC_qualitatif, PCTL_CM, PCTL_MDP, Reward_MC, Pmax, Reward_MDP
 
 
 window_name, base_class = uic.loadUiType("main-window.ui")
@@ -35,6 +35,9 @@ class MainWindow(window_name, base_class):
         self.current_image = None
         self.next_image = None
         # self.previous_image = None
+        self.simulation = False
+        self.pctl_for_mdp = False
+        self.etatscop = None
 
         self.etats_with_decision = None
         self.adv = {}
@@ -77,10 +80,11 @@ class MainWindow(window_name, base_class):
 
         # model checking 
         # TODO: Add more items
-        self.box_modelchecking.addItems(["SMC Quantitatif", "SMC Qualitatif", "PCTL for CMs", "PCTL for MDPs"])
+        self.box_modelchecking.addItems(["SMC Quantitatif", "SMC Qualitatif", "PCTL for CMs", "PCTL for MDPs", "Average Reward for MC", "Pmax for the accessibility", "Max Average Reward for MDP"])
         self.btn_accept_modelchecking.clicked.connect(self.model_checking_selected)
         self.hide_modelchecking_options()
         self.modelchecking_result.hide()
+        self.reward_widget_sol.hide()
         
         # model checking : smc quantitative
         self.btn_smc_quant.clicked.connect(self.smc_quantitatif_calculate)
@@ -94,6 +98,8 @@ class MainWindow(window_name, base_class):
         self.btn_pctl_cm.clicked.connect(self.pctl_cm_calculate)
         self.pctl_cm_widget.hide()
 
+        # model checking : reward cm
+        
         # others
         self.hide_simulate_options()
         self.clean_tmp()
@@ -124,6 +130,7 @@ class MainWindow(window_name, base_class):
                 self.label_image_init.setPixmap(pixmap)
     
     def simulate_options(self):
+        self.simulation = True
         self.show_simulate_options()
 
     def modelchecking_options(self):
@@ -181,6 +188,34 @@ class MainWindow(window_name, base_class):
             self.pctl_for_cms()
         elif option_selected == "PCTL for MDPs":
             self.pctl_for_mdps()
+        elif option_selected == "Average Reward for MC":
+            self.average_reward_for_mc()
+        elif option_selected == "Pmax for the accessibility":
+            self.pmax_for_the_accessibility()
+        elif option_selected == "Max Average Reward for MDP":
+            pass
+
+    def average_reward_for_mc(self):
+        self.hide_modelchecking_options()
+        self.label_options.setText("Average Reward for MC")
+        self.label_options.show()
+        result = Reward_MC(self.etats)
+        self.label_reward_sol1.setText(result)
+        self.reward_widget_sol.move(770, 200)
+        self.reward_widget_sol.show()
+
+    def pmax_for_the_accessibility(self):
+        self.hide_modelchecking_options()
+        self.label_options.setText("Pmax for the accessibility")
+        self.label_options.show()
+        # result = Reward_MC(self.etats)
+        # self.label_reward_sol1.setText(result)
+        # self.reward_widget_sol.move(770, 200)
+        # self.reward_widget_sol.show()
+        pass
+
+    def max_average_reward_for_mdp(self):
+        pass
 
     def smc_quantitative_option(self):
         # TODO: Add layout into widget. Add double layout.
@@ -244,7 +279,11 @@ class MainWindow(window_name, base_class):
         # TODO: create a function to show labels and buttons
         # TODO: create a function to hide labels and buttons
         self.hide_modelchecking_options()
-        self.label_options.setText("PCTL for CMs")
+        if not self.pctl_for_mdp:
+            self.label_options.setText("PCTL for CMs")
+        else:
+            # esconder adv
+            self.label_options.setText("PCTL for MDPs")
         self.label_options.show()
         self.pctl_cm_states.clear()
         # TODO: delete state S0 pop(0)
@@ -254,13 +293,14 @@ class MainWindow(window_name, base_class):
         self.pctl_cm_states.addItems(states_for_pctl_cm)
         self.pctl_cm_widget.move(740, 210)
         self.pctl_cm_widget.show()
-        pass
 
     def pctl_cm_calculate(self):
         goal_state = self.pctl_cm_states.currentText()
         N = self.pctl_cm_n_transitions.value()
-        result_pctl_cm1, result_pctl_cm2  = PCTL_CM(self.etats, goal_state, N)
-
+        if not self.pctl_for_mdp:
+            result_pctl_cm1, result_pctl_cm2  = PCTL_CM(self.etats, goal_state, N)
+        else:
+            result_pctl_cm1, result_pctl_cm2  = PCTL_CM(self.etatscop, goal_state, N)
         self.pctl_cm_widget.hide()
         self.modelchecking_result.move(780, 210)
         result1 = f'S0: {result_pctl_cm1[0]} S1: {result_pctl_cm1[1]} S2: {result_pctl_cm1[2]}'
@@ -273,6 +313,32 @@ class MainWindow(window_name, base_class):
         # TODO: create labels and buttons of this function
         # TODO: create a function to show labels and buttons
         # TODO: create a function to hide labels and buttons
+        self.pctl_for_mdp = True
+        self.hide_modelchecking_options()
+        self.label_options.setText("PCTL for MDPs")
+        self.label_options.show()
+        self.adversaire_print()
+        # self.pctl_cm_states.clear()
+        # # TODO: delete state S0 pop(0)
+        # states_for_pctl_cm = list(self.etats.keys())
+        # states_for_pctl_cm.pop(0)
+        # print(f'states_for_pctl_cm: {states_for_pctl_cm}')
+        # self.pctl_cm_states.addItems(states_for_pctl_cm)
+        # self.pctl_cm_widget.move(740, 210)
+        # self.pctl_cm_widget.show()
+        pass
+
+    def pctl_mdp_calculate(self):
+        # goal_state = self.pctl_cm_states.currentText()
+        # N = self.pctl_cm_n_transitions.value()
+        # result_pctl_cm1, result_pctl_cm2  = PCTL_CM(self.etats, goal_state, N)
+
+        # self.pctl_cm_widget.hide()
+        # self.modelchecking_result.move(780, 210)
+        # result1 = f'S0: {result_pctl_cm1[0]} S1: {result_pctl_cm1[1]} S2: {result_pctl_cm1[2]}'
+        # self.modelchecking_answer1.setText(result1)
+        # self.modelchecking_answer2.setText(result_pctl_cm2)
+        # self.modelchecking_result.show()
         pass
 
     def showDialog(self):
@@ -404,49 +470,37 @@ class MainWindow(window_name, base_class):
     def action_adv_choosen(self):
         self.adv[self.label_etat.text()] = self.box_actions_adv.currentText()
         if len(self.etats_with_decision) > 0:
-            # self.label_state_options.show()
-            # self.label_etat.show()
-            # self.box_actions_adv.show()
-            # self.btn_accept_action_adv.show()
             self.adv_widget.show()
             #self.label_prob.show()
             #self.label_action_probabilities.show()
             self.show_adv_option()
         else:
-            # self.label_create_adv.hide()
-            # self.label_state_options.hide()
-            # self.label_etat.hide()
-            # self.box_actions_adv.hide()
-            # self.btn_accept_action_adv.hide()
             self.adv_widget.hide()
             #self.label_prob.hide()
             #self.label_action_probabilities.hide()
+            if self.simulation:
+                simulation_adv(self.etats, self.adv, self.G, self.n_transitions)
+                # verify creation of images
+                directory = os.path.dirname(os.path.abspath(__file__)) + r'/tmp'
 
-            simulation_adv(self.etats, self.adv, self.G, self.n_transitions)
-            # verify creation of images
-            directory = os.path.dirname(os.path.abspath(__file__)) + r'/tmp'
+                images_created = False
 
-            images_created = False
-
-            while not images_created:
-                files_in_directory = os.listdir(directory)
-                filtered_files = [file for file in files_in_directory if file.endswith(".png")]
-                if len(filtered_files) == 2 * self.n_transitions + 3:
-                    images_created = True
-                    self.show_images_roullette()
+                while not images_created:
+                    files_in_directory = os.listdir(directory)
+                    filtered_files = [file for file in files_in_directory if file.endswith(".png")]
+                    if len(filtered_files) == 2 * self.n_transitions + 3:
+                        images_created = True
+                        self.show_images_roullette()
+            else:
+                self.etatscop = PCTL_MDP(self.etats, self.adv)
+                self.pctl_for_cms()
+                # asas
 
     def adversaire_print(self):
         self.option_selected()
         self.etats_with_decision = [k for k in self.etats.values() if k.have_decision]
 
-        # self.label_create_adv.show()
-        # self.label_state_options.show()
-        # self.label_etat.show()
-        # self.box_actions_adv.show()
-        # self.btn_accept_action_adv.show()
         self.adv_widget.show()
-        #self.label_prob.show()
-        #self.label_action_probabilities.show()
 
         self.show_adv_option()
 
