@@ -215,6 +215,9 @@ class MainWindow(window_name, base_class):
         pass
 
     def max_average_reward_for_mdp(self):
+        self.hide_modelchecking_options()
+        self.label_options.setText("Max Average Reward for MDP")
+        self.label_options.show()
         pass
 
     def smc_quantitative_option(self):
