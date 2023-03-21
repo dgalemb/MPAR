@@ -7,6 +7,7 @@ import sys
 
 import numpy as np
 from numpy import linalg
+from scipy.optimize import linprog
 import random
 
 
@@ -113,7 +114,7 @@ def main():
     etats = {}
     
 
-    lexer = gramLexer(FileStream("/Users/dgalembeck/Documents/Coding/Cours/MPAR/MDP-parser/mdps/pctl2.mdp"))
+    lexer = gramLexer(FileStream("/Users/dgalembeck/Documents/Coding/Cours/MPAR/MDP-parser/mdps/reward2.mdp"))
     stream = CommonTokenStream(lexer)
     parser = gramParser(stream)
     tree = parser.program()
@@ -151,8 +152,8 @@ def main():
 
     elif choice1 == 2:
 
-        print('Would you like to do SMC Quantitative or SMC Qualitatif or PCTL for CMs or PCTL for MDPs ...? Type 1 or 2 or 3 or 4 ... respectively.')
-        choice3 = int(input('Your choice (1 or 2 or 3 or 4...):'))
+        print('Would you like to do SMC Quantitative or SMC Qualitatif or PCTL for CMs or PCTL for MDPs or Average Reward for MC or Pmax for the accessibility or Max Average Reward for MDP...? Type 1 or 2 or 3 or 4 or 5 or 6 or 7... respectively.')
+        choice3 = int(input('Your choice (1 or 2 or 3 or 4 or 5 or 6 or 7 or...):'))
 
         if choice3 == 1:
             SMC_quantitatif(etats, G)
@@ -165,6 +166,15 @@ def main():
 
         elif choice3 == 4:
             PCTL_MDP(etats)
+
+        elif choice3 == 5:
+            Reward_MC(etats)
+
+        elif choice3 == 6:
+            Pmax(etats)
+
+        elif choice3 == 7:
+            Reward_MDP(etats)
     
 
 def simulation_choice(etats, G_print, chaine, printt, n=10):
@@ -381,8 +391,6 @@ def SMC_qualitatif(etats, G):
     gamma1 = theta - epsilon
     gamma0 = theta + epsilon
 
-    A = (1 - beta)/alpha
-    B = beta / (1 - alpha)
 
     Fm = 0
     Vadd = np.log(gamma1 / gamma0)
@@ -445,7 +453,7 @@ def PCTL_CM(etats):
                 
             b[etats[k].id] = sum
 
-
+    print(A)
     A = np.delete(A, [etats[s].id for s in S2], 1)
     b = np.delete(b, [etats[s].id for s in S2], 0)
 
@@ -470,7 +478,6 @@ def PCTL_CM(etats):
 
 def get_predecs(etats, state, S0):
 
-    forbidden = [state]
     if etats[state].predecs == []:
         return S0
     
@@ -510,13 +517,11 @@ def PCTL_MDP(etats):
         new_transitions = {'MC':etats[k].transitions[adv[k]]}
         etatscop[k].transitions = new_transitions
 
-    #for k in etatscop.values(): print(k)
-
     etatscop = inittMDP(etatscop)
 
-    for k in etatscop.values(): print(k)
-
     PCTL_CM(etatscop)
+
+    return
 
 def inittMDP(etats):
 
@@ -542,8 +547,143 @@ def find_by_id(etats, id):
         if j.id == id:
             return j.nom
 
+def Reward_MC(etats):
+
+    A = []
+    b = []
+    gamma = 0.5
+
+    for k in etats:
+     
+        A.append(etats[k].transitions['MC'])
+        b.append(etats[k].reward)
+
+    print()
+    T = np.linalg.inv((np.identity(len(A)) - np.dot(gamma, A)))
+    x = np.dot(T,b)
+
+    for k in etats.values():
+
+        print(f'The expected reward for the state {k.nom} is {x[k.id]}')
+
+def Pmax(etats):
+
+    goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
+
+    x = np.zeros(len(etats))
+    xold = np.ones(len(etats))
+
+    x[etats[goal_state].id] = 1
+
+    while(np.linalg.norm(x - xold) > 0.0001):
+        
+        xnew = x.copy()
+        xold = x.copy()
+
+        for o, s in enumerate(etats.values()):
+
+            actions = s.transitions.keys()
+            val = 0
+
+            for a in actions:
+                summ = 0
+                for p, t in enumerate(etats.values()):
+                    summ += s.transitions[a][t.id] * x[t.id]
+
+
+                if summ > val:
+                    val = summ
+            
+            xnew[s.id] = val
+
+        x = xnew
+
+    adv = {}
+
+    for o, s in enumerate(etats.values()):
+
+            actions = s.transitions.keys()
+            val = 0
+            aux = [[], []]
+
+            for a in actions:
+                summ = 0
+                for p, t in enumerate(etats.values()):
+                    summ += s.transitions[a][t.id] * x[t.id]
+
+                aux[0].append(summ)
+                aux[1].append(a)
+
+            adv[s.nom] = aux[1][np.argmax(aux[0])]
+
+    for rs, et in zip(x, etats.values()): print(f'The Pmax to reach {goal_state} from the state {et.nom} is {rs}')
+    for k in adv: print(f'The respective scheduler is the decision {adv[k]} for the state {k}')
+                 
+    return
+    
+def Reward_MDP(etats):
+
+    r = np.array([])
+    for k in etats.values():
+        r = np.append(r, k.reward)
+
+
+    rold = np.ones(len(etats))
+    gamma = 0.5
+
+
+    while(np.linalg.norm(r - rold) > 0.0001):
+        
+        rnew = r.copy()
+        rold = r.copy()
+
+        for o, s in enumerate(etats.values()):
+
+            actions = s.transitions.keys()
+            rew = s.reward
+            val = 0
+
+            for a in actions:
+                summ = 0
+                for p, t in enumerate(etats.values()):
+                    summ += s.transitions[a][t.id] * r[t.id]
+
+                summ = rew + gamma*summ
+
+                if summ > val:
+                    val = summ
+            
+            rnew[s.id] = val
+
+        r = rnew
+
+    adv = {}
+
+    for o, s in enumerate(etats.values()):
+
+            actions = s.transitions.keys()
+            rew = s.reward
+            val = 0
+            aux = [[], []]
+
+            for a in actions:
+                summ = 0
+                for p, t in enumerate(etats.values()):
+                    summ += s.transitions[a][t.id] * r[t.id]
+
+                summ = rew + gamma*summ
+                aux[0].append(summ)
+                aux[1].append(a)
+
+            adv[s.nom] = aux[1][np.argmax(aux[0])]
+
+
+
+    for rs, et in zip(r, etats.values()): print(f'The Rmax from the state (for gamma = {gamma}) {et.nom} is {rs}')
+    for k in adv: print(f'The respective scheduler is the decision {adv[k]} for the state {k}')
+
+    return
+
+
 if __name__ == '__main__':
     main()
-
-
-## I need a gu
