@@ -65,14 +65,15 @@ class MainWindow(window_name, base_class):
         self.btn_each_action_next.clicked.connect(self.create_new_image)
 
         # adversaire 
-        self.label_create_adv.hide()
-        self.label_state_options.hide()
-        self.label_etat.hide()
-        self.box_actions_adv.hide()
-        self.btn_accept_action_adv.hide()
+        # self.label_create_adv.hide()
+        # self.label_state_options.hide()
+        # self.label_etat.hide()
+        # self.box_actions_adv.hide()
+        # self.btn_accept_action_adv.hide()
+        self.adv_widget.hide()
         self.btn_accept_action_adv.clicked.connect(self.action_adv_choosen)
-        self.label_prob.hide()
-        self.label_action_probabilities.hide()
+        # self.label_prob.hide()
+        # self.label_action_probabilities.hide()
 
         # model checking 
         # TODO: Add more items
@@ -398,24 +399,26 @@ class MainWindow(window_name, base_class):
         self.label_etat.setText(action.nom)
         self.box_actions_adv.clear()
         self.box_actions_adv.addItems(list(action.transitions.keys()))
-        #self.label_action_probabilities.setText(', '.join(list(action.transitions.keys())) + ' = ' + ', '.join(map(str, list(action.transitions.values()))))
+        self.label_action_probabilities.setText(', '.join(list(action.transitions.keys())) + ' = ' + ', '.join(map(str, list(action.transitions.values()))))
 
     def action_adv_choosen(self):
         self.adv[self.label_etat.text()] = self.box_actions_adv.currentText()
         if len(self.etats_with_decision) > 0:
-            self.label_state_options.show()
-            self.label_etat.show()
-            self.box_actions_adv.show()
-            self.btn_accept_action_adv.show()
+            # self.label_state_options.show()
+            # self.label_etat.show()
+            # self.box_actions_adv.show()
+            # self.btn_accept_action_adv.show()
+            self.adv_widget.show()
             #self.label_prob.show()
             #self.label_action_probabilities.show()
             self.show_adv_option()
         else:
-            self.label_create_adv.hide()
-            self.label_state_options.hide()
-            self.label_etat.hide()
-            self.box_actions_adv.hide()
-            self.btn_accept_action_adv.hide()
+            # self.label_create_adv.hide()
+            # self.label_state_options.hide()
+            # self.label_etat.hide()
+            # self.box_actions_adv.hide()
+            # self.btn_accept_action_adv.hide()
+            self.adv_widget.hide()
             #self.label_prob.hide()
             #self.label_action_probabilities.hide()
 
@@ -436,11 +439,12 @@ class MainWindow(window_name, base_class):
         self.option_selected()
         self.etats_with_decision = [k for k in self.etats.values() if k.have_decision]
 
-        self.label_create_adv.show()
-        self.label_state_options.show()
-        self.label_etat.show()
-        self.box_actions_adv.show()
-        self.btn_accept_action_adv.show()
+        # self.label_create_adv.show()
+        # self.label_state_options.show()
+        # self.label_etat.show()
+        # self.box_actions_adv.show()
+        # self.btn_accept_action_adv.show()
+        self.adv_widget.show()
         #self.label_prob.show()
         #self.label_action_probabilities.show()
 
