@@ -318,19 +318,19 @@ def SMC_quantitatif(etats, G, goal_state, turns, epsilon, delta):
 
     gamma = success / N
 
-    result2 = f'The given model M respects the property given with probability {gamma}, respecting epsilon ({epsilon}) and delta ({delta})'
+    result2 = f'The given model M respects the property given with probability {round(gamma, 4)}, respecting epsilon ({round(epsilon, 4)}) and delta ({round(delta, 4)})'
     print(result2)
 
     return result1, result2
 
 def SMC_qualitatif(etats, G, goal_state, turns, epsilon, alpha, beta, theta):
 
-    goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
-    turns = int(input('''Please type in how many (at most) transitions you'd like to access such state. Type 0 if that's not important.'''))    
-    epsilon = float(input('''What's the desired precision (\epsilon)? It has to be a value in the [0,1] interval.'''))
-    alpha = float(input('''What's the desired value for alpha?'''))
-    beta = float(input('''What's the desired value for beta?'''))
-    theta = float(input('''What's the theta value you'd like to compare to?'''))
+    # goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
+    # turns = int(input('''Please type in how many (at most) transitions you'd like to access such state. Type 0 if that's not important.'''))    
+    # epsilon = float(input('''What's the desired precision (\epsilon)? It has to be a value in the [0,1] interval.'''))
+    # alpha = float(input('''What's the desired value for alpha?'''))
+    # beta = float(input('''What's the desired value for beta?'''))
+    # theta = float(input('''What's the theta value you'd like to compare to?'''))
 
     gamma1 = theta - epsilon
     gamma0 = theta + epsilon
@@ -349,29 +349,29 @@ def SMC_qualitatif(etats, G, goal_state, turns, epsilon, alpha, beta, theta):
     while(not end):
 
         chaine = []
-        simulation_rand(etats, G, chaine, False, turns)
+        simulation_rand_mdp(etats, G, chaine, False, turns)
         if goal_state in [k.nom for k in chaine]:
             Fm += Vadd
         else:
             Fm += Vrem
 
         if Fm >= Fa:
-            result = f'Hypothesis H1 accepted: Gamma <= Gamma1 = Gamma - Epsilon ({gamma1})!'
+            result = f'Hypothesis H1 accepted: Gamma <= Gamma1 = Gamma - Epsilon ({round(gamma1, 4)})!'
             print(result)
             end = True
             
         if Fm <= Fb:
-            result = f'hypothesis H0 accepted: Gamma >= Gamma0 = Gamma + Epsilon ({gamma0})!'
+            result = f'hypothesis H0 accepted: Gamma >= Gamma0 = Gamma + Epsilon ({round(gamma0, 4)})!'
             print(result)
             end = True
 
-    return result
+    return result, ""
 
-def PCTL_CM(etats):
+def PCTL_CM(etats, goal_state, N):
 
-    goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
+    # goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
 
-    N = int(input('''Would you like to test it for a certain number N of simulations? Type N or 0 if not.'''))
+    # N = int(input('''Would you like to test it for a certain number N of simulations? Type N or 0 if not.'''))
 
     S1 = []
     S1 = get_predecs(etats, goal_state, S1) + [goal_state]
@@ -388,6 +388,13 @@ def PCTL_CM(etats):
     S3 = [k for k in etats if k not in S2]
 
     print(S0, S1, S3)
+
+    result0 = [S0, S1, S3]
+    result = ""
+    if S3 == []:
+        result = f'The probability for the states {S1} to reach {goal_state} is 1 and 0 for all the others.'
+        print(result)
+        return result0, result
 
     A = []
     b = np.zeros(len(etats))
@@ -410,20 +417,22 @@ def PCTL_CM(etats):
 
         x = np.dot(np.linalg.inv(np.identity(len(A)) - A), b) 
         for k, i in zip(S3, range(len(S3))):
-            print(f'The probability for the state {k} is {x[i]}')
+            result = f'The probability for the state {k} is {round(x[i], 4)}'
+            print(result)
     
     else:
         y = np.zeros(len(A))
         for k in range(N):
-            print(y)
+            # print(y)
             y = np.dot(A, y) + b
-            print(y)          
+            # print(y)          
 
         for k, i in zip(S3, range(len(S3))):
-            print(f'The probability for the state {k} after at most {N} transitions is {y[i]}')
+            result = f'The probability for the state {k} after at most {N} transitions is {round(y[i], 4)}'
+            print(result)
 
 
-    return
+    return result0, result
 
 def get_predecs(etats, state, S0):
 
@@ -458,9 +467,9 @@ def get_succs(etats, state, S0):
 
     return S0
 
-def PCTL_MDP(etats):
+def PCTL_MDP(etats, adv):
 
-    adv = define_adversaire(etats)
+    # adv = define_adversaire(etats)
     etatscop = etats.copy()
 
     for k in adv:
@@ -471,9 +480,11 @@ def PCTL_MDP(etats):
 
     etatscop = inittMDP(etatscop)
 
-    for k in etatscop.values(): print(k)
+    # for k in etatscop.values(): print(k)
 
-    PCTL_CM(etatscop)
+    # PCTL_CM(etatscop)
+
+    return etatscop
 
 def inittMDP(etats):
 
@@ -487,7 +498,7 @@ def inittMDP(etats):
                 if k == 1.:
                     etats[find_by_id(etats, i)].predecs.append(dep.nom)
                
-                print(dep.succs, dep.predecs)
+                # print(dep.succs, dep.predecs)
 
 
 
@@ -498,3 +509,149 @@ def find_by_id(etats, id):
     for j in etats.values():
         if j.id == id:
             return j.nom
+
+def Reward_MC(etats):
+
+    A = []
+    b = []
+    gamma = 0.5
+
+    for k in etats:
+     
+        A.append(etats[k].transitions['MC'])
+        b.append(etats[k].reward)
+
+    print()
+    T = np.linalg.inv((np.identity(len(A)) - np.dot(gamma, A)))
+    x = np.dot(T,b)
+    result = ""
+    for k in etats.values():
+        result += f'The expected reward for the state {k.nom} is {round(x[k.id], 4)}\n'
+    print(result)
+    
+    return result
+
+def Pmax(etats, goal_state):
+
+    # goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
+
+    x = np.zeros(len(etats))
+    xold = np.ones(len(etats))
+
+    x[etats[goal_state].id] = 1
+
+    while(np.linalg.norm(x - xold) > 0.0001):
+        
+        xnew = x.copy()
+        xold = x.copy()
+
+        for o, s in enumerate(etats.values()):
+
+            actions = s.transitions.keys()
+            val = 0
+
+            for a in actions:
+                summ = 0
+                for p, t in enumerate(etats.values()):
+                    summ += s.transitions[a][t.id] * x[t.id]
+
+
+                if summ > val:
+                    val = summ
+            
+            xnew[s.id] = val
+
+        x = xnew
+
+    adv = {}
+
+    for o, s in enumerate(etats.values()):
+
+            actions = s.transitions.keys()
+            val = 0
+            aux = [[], []]
+
+            for a in actions:
+                summ = 0
+                for p, t in enumerate(etats.values()):
+                    summ += s.transitions[a][t.id] * x[t.id]
+
+                aux[0].append(summ)
+                aux[1].append(a)
+
+            adv[s.nom] = aux[1][np.argmax(aux[0])]
+
+    result = ""
+    for rs, et in zip(x, etats.values()): 
+        result += f'The Pmax to reach {goal_state} from the state {et.nom} is {rs}\n'
+    for k in adv: 
+        result += f'The respective scheduler is the decision {adv[k]} for the state {k}\n'
+    print(result)
+                 
+    return result
+    
+def Reward_MDP(etats):
+
+    r = np.array([])
+    for k in etats.values():
+        r = np.append(r, k.reward)
+
+
+    rold = np.ones(len(etats))
+    gamma = 0.5
+
+
+    while(np.linalg.norm(r - rold) > 0.0001):
+        
+        rnew = r.copy()
+        rold = r.copy()
+
+        for o, s in enumerate(etats.values()):
+
+            actions = s.transitions.keys()
+            rew = s.reward
+            val = 0
+
+            for a in actions:
+                summ = 0
+                for p, t in enumerate(etats.values()):
+                    summ += s.transitions[a][t.id] * r[t.id]
+
+                summ = rew + gamma*summ
+
+                if summ > val:
+                    val = summ
+            
+            rnew[s.id] = val
+
+        r = rnew
+
+    adv = {}
+
+    for o, s in enumerate(etats.values()):
+
+            actions = s.transitions.keys()
+            rew = s.reward
+            val = 0
+            aux = [[], []]
+
+            for a in actions:
+                summ = 0
+                for p, t in enumerate(etats.values()):
+                    summ += s.transitions[a][t.id] * r[t.id]
+
+                summ = rew + gamma*summ
+                aux[0].append(summ)
+                aux[1].append(a)
+
+            adv[s.nom] = aux[1][np.argmax(aux[0])]
+
+
+    result = ""
+    for rs, et in zip(r, etats.values()): 
+        result += f'The Rmax from the state (for gamma = {gamma}) {et.nom} is {rs}\n'
+    for k in adv: 
+        result += f'The respective scheduler is the decision {adv[k]} for the state {k}\n'
+    print(result)
+
+    return result
