@@ -318,7 +318,7 @@ def SMC_quantitatif(etats, G, goal_state, turns, epsilon, delta):
 
     gamma = success / N
 
-    result2 = f'The given model M respects the property given with probability {round(gamma, 4)}, respecting epsilon ({round(epsilon, 4)}) and delta ({round(delta, 4)})'
+    result2 = f'The given model M reaches {goal_state} with probability {round(gamma, 4)}, respecting epsilon ({round(epsilon, 4)}) and delta ({round(delta, 4)})'
     print(result2)
 
     return result1, result2
@@ -417,8 +417,8 @@ def PCTL_CM(etats, goal_state, N):
 
         x = np.dot(np.linalg.inv(np.identity(len(A)) - A), b) 
         for k, i in zip(S3, range(len(S3))):
-            result = f'The probability for the state {k} is {round(x[i], 4)}'
-            print(result)
+            result += f'The probability for the state {k} is {round(x[i], 4)}\n'
+        print(result)
     
     else:
         y = np.zeros(len(A))
@@ -428,8 +428,8 @@ def PCTL_CM(etats, goal_state, N):
             # print(y)          
 
         for k, i in zip(S3, range(len(S3))):
-            result = f'The probability for the state {k} after at most {N} transitions is {round(y[i], 4)}'
-            print(result)
+            result += f'The probability for the state {k} after at most {N} transitions is {round(y[i], 4)}\n'
+        print(result)
 
 
     return result0, result
