@@ -5,6 +5,8 @@ from gramParser import gramParser
 from gramPrint import print_graph, create_image_by_id
 import sys
 
+import math
+import itertools
 import numpy as np
 from numpy import linalg
 from scipy.optimize import linprog
@@ -114,7 +116,7 @@ def main():
     etats = {}
     
 
-    lexer = gramLexer(FileStream("/Users/dgalembeck/Documents/Coding/Cours/MPAR/MDP-parser/mdps/reward2.mdp"))
+    lexer = gramLexer(FileStream("/Users/dgalembeck/Documents/Coding/Cours/MPAR/MDP-parser/mdps/pctl.mdp"))
     stream = CommonTokenStream(lexer)
     parser = gramParser(stream)
     tree = parser.program()
@@ -129,6 +131,8 @@ def main():
     
     print('Would you like to simulate or to do some model-checking? Type 1 or 2 respectively.')
     choice1 = int(input('Your choice (1 or 2):'))
+
+    #choice1 = 2
 
     if choice1 == 1:
 
@@ -152,8 +156,9 @@ def main():
 
     elif choice1 == 2:
 
-        print('Would you like to do SMC Quantitative or SMC Qualitatif or PCTL for CMs or PCTL for MDPs or Average Reward for MC or Pmax for the accessibility or Max Average Reward for MDP...? Type 1 or 2 or 3 or 4 or 5 or 6 or 7... respectively.')
-        choice3 = int(input('Your choice (1 or 2 or 3 or 4 or 5 or 6 or 7 or...):'))
+        print('Would you like to do SMC Quantitative or SMC Qualitatif or PCTL for CMs or PCTL for MDPs or Average Reward for MC or Pmax for the accessibility or Max Average Reward for MDP or SMC for MDPs using RL? Type 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8 respectively.')
+        choice3 = int(input('Your choice (1 or 2 or 3 or 4 or 5 or 6 or 7 or 8):'))
+        #choice3 = 8
 
         if choice3 == 1:
             SMC_quantitatif(etats, G)
@@ -176,6 +181,9 @@ def main():
         elif choice3 == 7:
             Reward_MDP(etats)
     
+        elif choice3 == 8:
+            RL(etats)
+
 
 def simulation_choice(etats, G_print, chaine, printt, n=10):
 
@@ -239,7 +247,8 @@ def simulation_rand(etats, G_print, chaine, printt, n=10):
 
             random_key = random.choice(list(departure.transitions.keys()))
             random_transitions = departure.transitions[random_key]
-            print(f'The action {random_key} has been chosen')
+            if printt:
+                print(f'The action {random_key} has been chosen')
 
             print_id += random_key
 
@@ -440,6 +449,10 @@ def PCTL_CM(etats):
 
     print(S0, S1, S3)
 
+    if S3 == []:
+        print(f'The probability for the states {S1} to reach {goal_state} is 1 and 0 for all the others.')
+        return
+
     A = []
     b = np.zeros(len(etats))
 
@@ -453,7 +466,7 @@ def PCTL_CM(etats):
                 
             b[etats[k].id] = sum
 
-    print(A)
+    
     A = np.delete(A, [etats[s].id for s in S2], 1)
     b = np.delete(b, [etats[s].id for s in S2], 0)
 
@@ -461,7 +474,7 @@ def PCTL_CM(etats):
 
         x = np.dot(np.linalg.inv(np.identity(len(A)) - A), b) 
         for k, i in zip(S3, range(len(S3))):
-            print(f'The probability for the state {k} is {x[i]}')
+            print(f'The probability for the state {k} to reach {goal_state} is {x[i]}')
     
     else:
         y = np.zeros(len(A))
@@ -471,7 +484,7 @@ def PCTL_CM(etats):
             print(y)          
 
         for k, i in zip(S3, range(len(S3))):
-            print(f'The probability for the state {k} after at most {N} transitions is {y[i]}')
+            print(f'The probability for the state {k} to reach {goal_state} after at most {N} transitions is {y[i]}')
 
 
     return
@@ -535,9 +548,7 @@ def inittMDP(etats):
                 if k == 1.:
                     etats[find_by_id(etats, i)].predecs.append(dep.nom)
                
-                print(dep.succs, dep.predecs)
-
-
+                #print(dep.succs, dep.predecs)
 
     return etats
 
@@ -564,7 +575,7 @@ def Reward_MC(etats):
 
     for k in etats.values():
 
-        print(f'The expected reward for the state {k.nom} is {x[k.id]}')
+        print(f'The expected reward from the state {k.nom} is {x[k.id]}')
 
 def Pmax(etats):
 
@@ -617,7 +628,7 @@ def Pmax(etats):
             adv[s.nom] = aux[1][np.argmax(aux[0])]
 
     for rs, et in zip(x, etats.values()): print(f'The Pmax to reach {goal_state} from the state {et.nom} is {rs}')
-    for k in adv: print(f'The respective scheduler is the decision {adv[k]} for the state {k}')
+    for k in adv: print(f'The respective scheduler is to choose the decision {adv[k]} for the state {k}')
                  
     return
     
@@ -680,9 +691,102 @@ def Reward_MDP(etats):
 
 
     for rs, et in zip(r, etats.values()): print(f'The Rmax from the state (for gamma = {gamma}) {et.nom} is {rs}')
-    for k in adv: print(f'The respective scheduler is the decision {adv[k]} for the state {k}')
+    for k in adv: print(f'The respective scheduler is to choose the decision {adv[k]} for the state {k}')
 
     return
+
+def RL(etats):
+
+    #goal_state = str(input('''Please type the state you'd like to test the accessability.'''))
+    goal_state = 'S3'
+    #theta = float(input('''What's the theta value you'd like to compare to?'''))
+    theta = 0.12
+    
+    h = 0.5
+    e = 0.9
+    N = 100
+    L = 10
+
+    mu = 0.1
+    p = 0.02
+    T = int(np.ceil(math.log(mu, 2) / math.log(1 - p, 2)))
+
+    PossAdvs, actions = initAdv(etats)
+    adv = random.choice(PossAdvs)
+    PossAdvs.remove(adv)
+    results = {}
+
+    for i in range(T):
+
+        Q, adv = OptimiseAdv(adv, h, e, N, L, etats, actions, goal_state)
+        results[adv] = sum(map(sum, Q))
+        adv = random.choice(PossAdvs)
+        PossAdvs.remove(adv)
+        if len(PossAdvs) == 0: break
+        
+def initAdv(etats):
+
+    aux = []
+
+    for k in etats.values():
+        
+        aux.append(list(k.transitions.keys()))
+
+    PossAdvs = list(itertools.product(*aux))
+    actions = list(set(itertools.chain(*aux)))
+
+    return PossAdvs, actions
+
+def OptimiseAdv(adv, h, e, N, L, etats, actions, goal_state):
+
+    for k in etats.values(): print(k)
+
+    for j in range(L):
+
+        M = etats.copy()
+        
+        if j == 0:
+
+            for (k, eta) in enumerate(etats.values()):
+        
+                new_transitions = {'MC':eta.transitions[adv[k]]}
+                M[eta.nom].transitions = new_transitions
+        
+        Q = AdvEval(M, adv, N, actions, goal_state, etats)
+
+        adv = AdvImprov(adv, h, e, Q, etats)    
+
+    return Q, adv
+
+def AdvEval(M, adv, N, actions, goal_state, etats):
+
+    G = {}
+
+    R1 = np.zeros((len(etats), len(actions)))
+    R2 = np.zeros((len(etats), len(actions)))
+    Q = np.zeros((len(etats), len(actions)))
+
+
+    for i in range(N):
+        chaine = []
+        simulation_rand(M, G, chaine, False, N)
+
+        for s in chaine:
+            if s == goal_state:
+                R1[etats[s.nom].id][actions.index(adv[etats[s.nom].id])] += 1
+
+            else:
+                R2[etats[s.nom].id][actions.index(adv[etats[s.nom].id])] += 1
+
+        Q = R1/(R1 + R2)
+
+    return Q
+
+def AdvImprov(adv, h, e, Q, etats):
+
+    return adv
+
+
 
 
 if __name__ == '__main__':
