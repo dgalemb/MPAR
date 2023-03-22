@@ -132,11 +132,11 @@ def load_mdp(path_to_mdp):
 def simulation_choice_decision(etats, G_print, id_image, key):
     departure = chaine[-1]
 
-    print_id = departure.nom
+    print_id = departure.nom + " "
 
     transitions = departure.transitions[key]
 
-    print_id += key  # add action to the id
+    print_id += key + " " # add action to the id
 
     arrival_id = choose_state(transitions)
     filtered_dict = {k: v for k, v in etats.items() if v.id == arrival_id}
@@ -151,7 +151,7 @@ def simulation_choice_normal(etats, G_print, id_image):
     departure = chaine[-1]
     # print_id = ""
 
-    print_id = departure.nom
+    print_id = departure.nom + " "
 
     transitions = departure.transitions['MC']
 
@@ -193,7 +193,7 @@ def simulation_rand(etats, G_print, n=10):
     for k in range(n):
         id_image += 2
         print(f'The current state is {departure.nom}')
-        print_id = departure.nom
+        print_id = departure.nom + " "
 
         if departure.have_decision:
 
@@ -201,7 +201,7 @@ def simulation_rand(etats, G_print, n=10):
             random_transitions = departure.transitions[random_key]
             print(f'The action {random_key} has been chosen')
 
-            print_id += random_key
+            print_id += random_key  + " "
 
             arrival_id = choose_state(random_transitions)
             filtered_dict = {k: v for k, v in etats.items() if v.id == arrival_id}
@@ -216,7 +216,7 @@ def simulation_rand(etats, G_print, n=10):
         obj = [k for k in filtered_dict.values()]
         departure = obj[0]
         print_id += departure.nom
-        # print(f"print_id = {print_id}")
+        print(f"print_id = {print_id}")
         create_image_by_id(print_id, G_print, id_image)
         chaine.append(departure)
 
@@ -232,7 +232,7 @@ def simulation_adv(etats, adv, G_print, n=10):
     for k in range(n):
         id_image += 2
         print(f'The current state is {departure.nom}')
-        print_id = departure.nom
+        print_id = departure.nom + " "
 
         if departure.have_decision:
 
@@ -240,7 +240,7 @@ def simulation_adv(etats, adv, G_print, n=10):
             transitions = departure.transitions[key]
             print(f'The action {key} has been chosen by the opponent')
 
-            print_id += key
+            print_id += key + " "
 
             arrival_id = choose_state(transitions)
             filtered_dict = {k: v for k, v in etats.items() if v.id == arrival_id}
