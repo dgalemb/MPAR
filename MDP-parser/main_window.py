@@ -50,7 +50,7 @@ class MainWindow(window_name, base_class):
 
         # Init questions
         self.btn_simulate.clicked.connect(self.simulate_options)
-        self.btn_modelchecking.clicked.connect(self.modelchecking_options)
+        self.btn_modelchecking.clicked.connect(self.cms_or_mdps)
         self.hide_init_options()
 
         self.btn_folder.clicked.connect(self.showDialog)
@@ -80,11 +80,13 @@ class MainWindow(window_name, base_class):
 
         # model checking 
         # TODO: Add more items
-        self.box_modelchecking.addItems(["SMC Quantitatif", "SMC Qualitatif", "PCTL for CMs", "PCTL for MDPs", "Average Reward for MC", "Pmax for the accessibility", "Max Average Reward for MDP"])
         self.btn_accept_modelchecking.clicked.connect(self.model_checking_selected)
         self.hide_modelchecking_options()
         self.modelchecking_result.hide()
         self.reward_widget_sol.hide()
+        self.btns_sim_md.hide()
+        self.btn_cms.clicked.connect(self.modelchecking_cm_options)
+        self.btn_mdps.clicked.connect(self.modelchecking_mdp_options)
         
         # model checking : smc quantitative
         self.btn_smc_quant.clicked.connect(self.smc_quantitatif_calculate)
@@ -137,13 +139,29 @@ class MainWindow(window_name, base_class):
         self.simulation = True
         self.show_simulate_options()
 
-    def modelchecking_options(self):
-        self.show_modelchecking_options()
-
-    def show_modelchecking_options(self):
+    def cms_or_mdps(self):
         self.hide_init_options()
         self.label_options.setText("Model Checking options")
         self.label_options.show()
+        self.btns_sim_md.show()
+        self.btn_simulate.hide()
+        self.btn_modelchecking.hide()
+        self.btn_cms.show()
+        self.btn_mdps.show()
+
+    def modelchecking_cm_options(self):
+        self.btns_sim_md.hide()
+        options = ["SMC Quantitatif", "SMC Qualitatif", "PCTL for CMs", "Average Reward for MC"]
+        self.show_modelchecking_options(options)
+
+    def modelchecking_mdp_options(self):
+        self.btns_sim_md.hide()
+        options = ["PCTL for MDPs", "Pmax for the accessibility", "Max Average Reward for MDP"]
+        self.show_modelchecking_options(options)
+
+    def show_modelchecking_options(self, items):
+        self.box_modelchecking.clear()
+        self.box_modelchecking.addItems(items)
         self.box_modelchecking.show()
         self.btn_accept_modelchecking.show()
     
@@ -154,13 +172,13 @@ class MainWindow(window_name, base_class):
 
     def show_init_options(self):
         self.label_options.show()
-        self.btn_modelchecking.show()
-        self.btn_simulate.show()
+        self.btns_sim_md.show()
     
     def hide_init_options(self):
         self.label_options.hide()
-        self.btn_modelchecking.hide()
-        self.btn_simulate.hide()
+        self.btns_sim_md.hide()
+        self.btn_cms.hide()
+        self.btn_mdps.hide()
     
     def hide_simulate_options(self):
         # TO DO: change label_options text
@@ -183,7 +201,7 @@ class MainWindow(window_name, base_class):
 
     def model_checking_selected(self):
         option_selected = self.box_modelchecking.currentText()
-        if option_selected == "SMC Quantitative":
+        if option_selected == "SMC Quantitatif":
             self.smc_quantitative_option()
         elif option_selected == "SMC Qualitatif":
             self.smc_qualitatif_option()
