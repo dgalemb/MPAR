@@ -447,6 +447,10 @@ def PCTL_CM(etats):
     S2 = S1 + S0
     S3 = [k for k in etats if k not in S2]
 
+    if S3 == []:
+        print(f'The probability for the states {S1} to reach {goal_state} is 1 and 0 for all the others.')
+        return
+
     print(S0, S1, S3)
 
     if S3 == []:
@@ -466,7 +470,7 @@ def PCTL_CM(etats):
                 
             b[etats[k].id] = sum
 
-    
+    print(A)
     A = np.delete(A, [etats[s].id for s in S2], 1)
     b = np.delete(b, [etats[s].id for s in S2], 0)
 
@@ -479,9 +483,9 @@ def PCTL_CM(etats):
     else:
         y = np.zeros(len(A))
         for k in range(N):
-            print(y)
+            # print(y)
             y = np.dot(A, y) + b
-            print(y)          
+            # print(y)          
 
         for k, i in zip(S3, range(len(S3))):
             print(f'The probability for the state {k} to reach {goal_state} after at most {N} transitions is {y[i]}')
@@ -548,7 +552,9 @@ def inittMDP(etats):
                 if k == 1.:
                     etats[find_by_id(etats, i)].predecs.append(dep.nom)
                
-                #print(dep.succs, dep.predecs)
+                print(dep.succs, dep.predecs)
+
+
 
     return etats
 

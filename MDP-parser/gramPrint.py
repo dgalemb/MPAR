@@ -24,6 +24,7 @@ def size_edges(states):
 
 
 def create_image_by_id(id_, g_print, id_image):
+    ids = id_.split()
     for i, n in enumerate(g_print.edges(data=True)):
         if n[-1]['id'] == id_:
             n[-1]['color'] = 'green'
@@ -31,24 +32,27 @@ def create_image_by_id(id_, g_print, id_image):
             n[-1]['color'] = 'black'
 
     save_image(g_print, id_image)
-    letters = list(string.ascii_uppercase)
-    if len(id_) > 3 or id_[-1].isnumeric():
-        id_tmp = id_[-3:]
-        for l in letters:
-            if l in id_tmp:
-                id_ = id_tmp[id_tmp.index(l):]
-                for i, n in enumerate(g_print.nodes(data=True)):
-                    if n[-1]['id'] == id_:
-                        n[-1]['fillcolor'] = 'green'
-                    else:
-                        n[-1]['fillcolor'] = 'white'
-    else:
-        id_ = id_[-1]
-        for i, n in enumerate(g_print.nodes(data=True)):
-            if n[-1]['id'] == id_:
-                n[-1]['fillcolor'] = 'green'
-            else:
-                n[-1]['fillcolor'] = 'white'
+    # letters = list(string.ascii_uppercase)
+    # if len(id_) > 3 or id_[-1].isnumeric():
+    #     id_tmp = id_[-3:]
+    #     print(f'id_tmp = id_[-3:] {id_tmp}')
+    #     for l in letters:
+    #         if l in id_tmp:
+    #             id_ = id_tmp[id_tmp.index(l):]
+    #             print(f"if_ after id_[-3:]:{id_} ")
+    for i, n in enumerate(g_print.nodes(data=True)):
+        if n[-1]['id'] == ids[-1]:
+            n[-1]['fillcolor'] = 'green'
+        else:
+            n[-1]['fillcolor'] = 'white'
+    # else:
+    #     id_ = id_[-1]
+    #     print(f"id_ en else es: id_")
+    #     for i, n in enumerate(g_print.nodes(data=True)):
+    #         if n[-1]['id'] == id_:
+    #             n[-1]['fillcolor'] = 'green'
+    #         else:
+    #             n[-1]['fillcolor'] = 'white'
 
 
     save_image(g_print, id_image + 1)
@@ -102,12 +106,12 @@ def print_graph(etats):
                 for next_state in P[state][action]:
                     prob = P[state][action][next_state]
                     if prob > 0:
-                        G.add_edge(state, next_state, id=f"{state}{action}{next_state}", label=f"{action} ({prob:.2f})", len=s_edges, color=actions[action], font_size=5)
+                        G.add_edge(state, next_state, id=f"{state} {action} {next_state}", label=f"{action} ({prob:.2f})", len=s_edges, color=actions[action], font_size=5)
         else:
             for next_state in P[state]:
                 prob = P[state][next_state]
                 if prob > 0:
-                    G.add_edge(state, next_state, id=f"{state}{next_state}", label=f"({prob:.2f})", len=s_edges, color='black')
+                    G.add_edge(state, next_state, id=f"{state} {next_state}", label=f"({prob:.2f})", len=s_edges, color='black')
 
     save_image(G, 'init')
     return G
@@ -140,71 +144,3 @@ def print_graph2():
     ax.margins(0.20)
     plt.axis("off")
     plt.show()
-
-
-# Gif :
-# # Markov chain parameters
-# states = [(0, 0),
-#           (1, 0),
-#           (2, 0), ]
-#
-# Q = [[0.2, 0.3, 0.5],
-#      [0.1, 0.2, 0.7],
-#      [0.3, 0.7, 0]
-#      ]
-#
-# # Sampling the markov chain over 100 steps
-# N_steps = 100
-# node_ind = 0
-# node_sel = [node_ind]
-# for i in range(N_steps):
-#     temp_ni = np.random.choice(3, p=Q[node_ind])
-#     node_sel.append(temp_ni)
-#     node_ind = temp_ni
-#
-# # Setting up network
-# G = nx.MultiDiGraph()
-# [G.add_node(s, style='filled', fillcolor='white', shape='circle', fixedsize='true', width=0.5) for s in states]
-#
-# labels = {}
-# edge_labels = {}
-#
-# for i, origin_state in enumerate(states):
-#     for j, destination_state in enumerate(states):
-#         rate = Q[i][j]
-#         if rate > 0:
-#             G.add_edge(origin_state, destination_state, weight=rate, label="{:.02f}".format(rate), len=2)
-#
-# A = to_agraph(G)
-# A.layout()
-# A.draw('test.png')
-
-# # Setting up node color for each iteration
-# for k in range(N_steps):
-#     for i, n in enumerate(G.nodes(data=True)):
-#         if i == node_sel[k]:
-#             n[1]['fillcolor'] = 'blue'
-#         else:
-#             n[1]['fillcolor'] = 'white'
-#
-#     A = to_agraph(G)
-#     A.layout()
-#     A.draw('net_' + str(k) + '.png')
-#
-# # Create gif with imageio
-# images = []
-# filenames = ['net_' + str(k) + '.png' for k in range(N_steps)]
-# for filename in filenames:
-#     images.append(imageio.v2.imread(filename))
-# imageio.mimsave('markov_chain.gif', images, fps=3)
-
-
-
-
-
-# Draw the graph
-# pos = nx.spring_layout(G)
-# nx.draw_networkx(G, pos, with_labels=True)
-# edge_labels = nx.get_edge_attributes(G, "label")
-# nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
-# plt.show()
