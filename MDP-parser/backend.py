@@ -590,7 +590,7 @@ def Pmax(etats, goal_state):
                  
     return result
     
-def Reward_MDP(etats):
+def Reward_MDP(etats, gamma):
 
     r = np.array([])
     for k in etats.values():
@@ -598,8 +598,7 @@ def Reward_MDP(etats):
 
 
     rold = np.ones(len(etats))
-    gamma = 0.5
-
+    # gamma = 0.5
 
     while(np.linalg.norm(r - rold) > 0.0001):
         

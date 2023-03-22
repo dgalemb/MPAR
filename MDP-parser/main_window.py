@@ -101,10 +101,14 @@ class MainWindow(window_name, base_class):
         self.pctl_cm_widget.hide()
 
         # model checking : reward cm
+        self.reward_mdp_widget.hide()
 
         # model checking : pmax
         self.pmax_widget.hide()
         self.btn_pmax.clicked.connect(self.pmax_calculate)
+
+        # reward mdp
+        self.btn_reward_mdp.clicked.connect(self.max_average_reward_for_mdp_calculate)
 
         # others
         self.hide_simulate_options()
@@ -230,7 +234,9 @@ class MainWindow(window_name, base_class):
         self.label_options.setText("Pmax for the accessibility")
         self.label_options.show()
         self.pmax_states.clear()
-        self.pmax_states.addItems(self.etats)
+        states_for_pmax = list(self.etats.keys())
+        states_for_pmax.pop(0)
+        self.pmax_states.addItems(states_for_pmax)
         self.pmax_widget.show()
         self.pmax_widget.move(770, 220)
         # result = Reward_MC(self.etats)
@@ -251,12 +257,16 @@ class MainWindow(window_name, base_class):
         self.hide_modelchecking_options()
         self.label_options.setText("Max Average Reward for MDP")
         self.label_options.show()
-
-        result_reward_mdp = Reward_MDP(self.etats)
+        self.reward_mdp_widget.move(770, 250)
+        self.reward_mdp_widget.show()
+        
+    def max_average_reward_for_mdp_calculate(self):
+        self.reward_mdp_widget.hide()
+        gamma = self.reward_mdp_gamma.value()
+        result_reward_mdp = Reward_MDP(self.etats, gamma)
         self.reward_widget_sol.move(780, 210)
         self.label_reward_sol1.setText(result_reward_mdp)
         self.reward_widget_sol.show()
-        
 
     def smc_quantitative_option(self):
         self.hide_modelchecking_options()
