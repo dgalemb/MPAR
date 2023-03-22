@@ -649,7 +649,7 @@ def Reward_MDP(etats):
 
     result = ""
     for rs, et in zip(r, etats.values()): 
-        result += f'The Rmax from the state (for gamma = {gamma}) {et.nom} is {rs}\n'
+        result += f'The Rmax from the state (for gamma = {gamma}) {et.nom} is {round(rs, 4)}\n'
     for k in adv: 
         result += f'The respective scheduler is the decision {adv[k]} for the state {k}\n'
     print(result)
