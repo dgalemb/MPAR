@@ -182,7 +182,6 @@ class MainWindow(window_name, base_class):
         self.number_transitions.show()
 
     def model_checking_selected(self):
-        # TODO: add functions from mdp.py to backend.py
         option_selected = self.box_modelchecking.currentText()
         if option_selected == "SMC Quantitative":
             self.smc_quantitative_option()
@@ -197,7 +196,7 @@ class MainWindow(window_name, base_class):
         elif option_selected == "Pmax for the accessibility":
             self.pmax_for_the_accessibility()
         elif option_selected == "Max Average Reward for MDP":
-            pass
+            self.max_average_reward_for_mdp()
 
     def average_reward_for_mc(self):
         self.hide_modelchecking_options()
@@ -220,7 +219,6 @@ class MainWindow(window_name, base_class):
         # self.label_reward_sol1.setText(result)
         # self.reward_widget_sol.move(770, 200)
         # self.reward_widget_sol.show()
-        pass
 
     def pmax_calculate(self):
         goal_state = self.pmax_states.currentText()
@@ -230,21 +228,19 @@ class MainWindow(window_name, base_class):
         self.reward_widget_sol.move(780, 210)
         self.label_reward_sol1.setText(result_pmax)
         self.reward_widget_sol.show()
-        pass
 
     def max_average_reward_for_mdp(self):
         self.hide_modelchecking_options()
         self.label_options.setText("Max Average Reward for MDP")
         self.label_options.show()
-        pass
+
+        result_reward_mdp = Reward_MDP(self.etats)
+        self.reward_widget_sol.move(780, 210)
+        self.label_reward_sol1.setText(result_reward_mdp)
+        self.reward_widget_sol.show()
+        
 
     def smc_quantitative_option(self):
-        # TODO: Add layout into widget. Add double layout.
-        # TODO: Adapt function for interface controller
-        # TODO: create labels and buttons of this function
-        # For add unicode characters into qt designer: https://stackoverflow.com/questions/52592663/unicode-characters-in-qt-designer-for-python
-        # TODO: create a function to show labels and buttons
-        # TODO: create a function to hide labels and buttons
         self.hide_modelchecking_options()
         self.label_options.setText("SMC Quantitatif")
         self.label_options.show()
@@ -267,10 +263,6 @@ class MainWindow(window_name, base_class):
         self.modelchecking_result.show()
 
     def smc_qualitatif_option(self):
-        # TODO: Adapt function for interface controller
-        # TODO: create labels and buttons of this function
-        # TODO: create a function to show labels and buttons
-        # TODO: create a function to hide labels and buttons
         self.hide_modelchecking_options()
         self.label_options.setText("SMC Qualitatif")
         self.label_options.show()
@@ -295,10 +287,6 @@ class MainWindow(window_name, base_class):
         self.modelchecking_result.show()
 
     def pctl_for_cms(self):
-        # TODO: Adapt function for interface controller
-        # TODO: create labels and buttons of this function
-        # TODO: create a function to show labels and buttons
-        # TODO: create a function to hide labels and buttons
         self.hide_modelchecking_options()
         if not self.pctl_for_mdp:
             self.label_options.setText("PCTL for CMs")
@@ -330,37 +318,11 @@ class MainWindow(window_name, base_class):
         self.modelchecking_result.show()
 
     def pctl_for_mdps(self):
-        # TODO: Adapt function for interface controller
-        # TODO: create labels and buttons of this function
-        # TODO: create a function to show labels and buttons
-        # TODO: create a function to hide labels and buttons
         self.pctl_for_mdp = True
         self.hide_modelchecking_options()
         self.label_options.setText("PCTL for MDPs")
         self.label_options.show()
         self.adversaire_print()
-        # self.pctl_cm_states.clear()
-        # # TODO: delete state S0 pop(0)
-        # states_for_pctl_cm = list(self.etats.keys())
-        # states_for_pctl_cm.pop(0)
-        # print(f'states_for_pctl_cm: {states_for_pctl_cm}')
-        # self.pctl_cm_states.addItems(states_for_pctl_cm)
-        # self.pctl_cm_widget.move(740, 210)
-        # self.pctl_cm_widget.show()
-        pass
-
-    def pctl_mdp_calculate(self):
-        # goal_state = self.pctl_cm_states.currentText()
-        # N = self.pctl_cm_n_transitions.value()
-        # result_pctl_cm1, result_pctl_cm2  = PCTL_CM(self.etats, goal_state, N)
-
-        # self.pctl_cm_widget.hide()
-        # self.modelchecking_result.move(780, 210)
-        # result1 = f'S0: {result_pctl_cm1[0]} S1: {result_pctl_cm1[1]} S2: {result_pctl_cm1[2]}'
-        # self.modelchecking_answer1.setText(result1)
-        # self.modelchecking_answer2.setText(result_pctl_cm2)
-        # self.modelchecking_result.show()
-        pass
 
     def showDialog(self):
         directory = Path("")
