@@ -583,7 +583,7 @@ def Pmax(etats, goal_state):
 
     result = ""
     for rs, et in zip(x, etats.values()): 
-        result += f'The Pmax to reach {goal_state} from the state {et.nom} is {rs}\n'
+        result += f'The Pmax to reach {goal_state} from the state {et.nom} is {round(rs, 4)}\n'
     for k in adv: 
         result += f'The respective scheduler is the decision {adv[k]} for the state {k}\n'
     print(result)

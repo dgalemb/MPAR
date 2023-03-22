@@ -99,7 +99,11 @@ class MainWindow(window_name, base_class):
         self.pctl_cm_widget.hide()
 
         # model checking : reward cm
-        
+
+        # model checking : pmax
+        self.pmax_widget.hide()
+        self.btn_pmax.clicked.connect(self.pmax_calculate)
+
         # others
         self.hide_simulate_options()
         self.clean_tmp()
@@ -208,10 +212,24 @@ class MainWindow(window_name, base_class):
         self.hide_modelchecking_options()
         self.label_options.setText("Pmax for the accessibility")
         self.label_options.show()
+        self.pmax_states.clear()
+        self.pmax_states.addItems(self.etats)
+        self.pmax_widget.show()
+        self.pmax_widget.move(770, 220)
         # result = Reward_MC(self.etats)
         # self.label_reward_sol1.setText(result)
         # self.reward_widget_sol.move(770, 200)
         # self.reward_widget_sol.show()
+        pass
+
+    def pmax_calculate(self):
+        goal_state = self.pmax_states.currentText()
+        result_pmax= Pmax(self.etats, goal_state)
+
+        self.pmax_widget.hide()
+        self.reward_widget_sol.move(780, 210)
+        self.label_reward_sol1.setText(result_pmax)
+        self.reward_widget_sol.show()
         pass
 
     def max_average_reward_for_mdp(self):
